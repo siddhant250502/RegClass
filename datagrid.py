@@ -228,7 +228,7 @@ if st.session_state.page == 0:
                         )
     st.session_state['file_path'] = res.loc[res.Select.idxmax()]['File Name']
     st.session_state['upload_file'] = st.file_uploader("Upload your dataset", type=['csv', 'xlsx'])
-    if len(res[res.Select == True])==1 or st.session_state['file_path']:
+    if len(res[res.Select == True])==1 or st.session_state['upload_file'] is not None:
         col7, col8 = st.columns([0.1,1])
         with col8:
             st.button("Next", on_click=nextpage, disabled=(st.session_state.page > 1))
