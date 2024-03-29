@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import datetime
+import sklearn
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix
@@ -15,11 +16,15 @@ import matplotlib.pyplot as plt
 import pickle
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
+with open('style.scss') as f:
+    st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
         
 if "page" not in st.session_state:
     st.session_state.page = 0
 if 'file_path' not in st.session_state:
     st.session_state['file_path'] = ' '
+if 'upload_file' not in st.session_state:
+    st.session_state['upload_file'] = None
 if 'reg' not in st.session_state:
     st.session_state['reg'] = False
     
@@ -223,7 +228,8 @@ if st.session_state.page == 0:
                         use_container_width=True
                         )
     st.session_state['file_path'] = res.loc[res.Select.idxmax()]['File Name']
-    if len(res[res.Select == True])==1:
+    st.session_state['upload_file'] = st.file_uploader("Upload your dataset", type=['csv', 'xlsx'])
+    if len(res[res.Select == True])==1 or st.session_state['file_path']:
         col7, col8 = st.columns([0.1,1])
         with col8:
             st.button("Next", on_click=nextpage, disabled=(st.session_state.page > 1))
@@ -238,11 +244,16 @@ if st.session_state.page == 0:
         
     else:
         st.write('Please select only 1 option / database')
+    
+
 
 elif st.session_state.page == 1:
     st.button('Back to Datasets', on_click=back)
     with st.container(border=True):
-        df = pd.read_csv(st.session_state['file_path'], low_memory=False)
+        if st.session_state['file_path'] is not None:
+            df = pd.read_csv(st.session_state['file_path'], delimiter=',')
+        elif st.session_state['upload_file'] is not None:
+            df = pd.read_csv(st.session_state['upload_file'], delimiter=',')
         df = data_cleaning(df)
         y = df[df.columns[-1]]
         unique_vals = len(y.unique())
