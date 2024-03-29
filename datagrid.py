@@ -250,8 +250,6 @@ if st.session_state.page == 0:
 
 elif st.session_state.page == 1:
     st.button('Back to Datasets', on_click=back)
-    st.write(st.session_state['file_path'])
-    st.write(st.session_state['upload_file'])
     with st.container(border=True):
         try:
             if st.session_state['file_path'] is not None:
