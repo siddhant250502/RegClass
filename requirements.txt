@@ -1,11 +1,11 @@
 numpy
 pandas
 scikit-learn
-os
-datetime
+os-sys
+DateTime
 plotly
-time
+TIME-python
 streamlit_pandas_profiling
 ydata_profiling
 matplotlib
-pickle
+pickle5
