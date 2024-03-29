@@ -15,8 +15,6 @@ import matplotlib.pyplot as plt
 import pickle
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
-with open('style.scss') as f:
-    st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
         
 if "page" not in st.session_state:
     st.session_state.page = 0
