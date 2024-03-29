@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 import pickle
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
-
+# with open('style.scss') as f:
+#     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
         
 if "page" not in st.session_state:
     st.session_state.page = 0
@@ -228,6 +229,7 @@ if st.session_state.page == 0:
                         )
     st.session_state['file_path'] = res.loc[res.Select.idxmax()]['File Name']
     st.session_state['upload_file'] = st.file_uploader("Upload your dataset", type=['csv', 'xlsx'])
+    
     if len(res[res.Select == True])==1 or st.session_state['upload_file'] is not None:
         col7, col8 = st.columns([0.1,1])
         with col8:
@@ -248,6 +250,8 @@ if st.session_state.page == 0:
 
 elif st.session_state.page == 1:
     st.button('Back to Datasets', on_click=back)
+    st.write(st.session_state['file_path'])
+    st.write(st.session_state['upload_file'])
     with st.container(border=True):
         try:
             if st.session_state['file_path'] is not None:
