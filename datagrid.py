@@ -228,7 +228,7 @@ if st.session_state.page == 0:
                         use_container_width=True
                         )
     st.session_state['file_path'] = res.loc[res.Select.idxmax()]['File Name']
-    st.session_state['upload_file'] = st.file_uploader("Upload your dataset", type=['csv','xlsx'])
+    st.session_state['upload_file'] = st.file_uploader("Upload your dataset", type=['csv'])
     
     if len(res[res.Select == True])==1 or st.session_state['upload_file'] is not None:
         col7, col8 = st.columns([0.1,1])
@@ -259,9 +259,9 @@ elif st.session_state.page == 1:
                     df = pd.read_csv(st.session_state['file_path'], delimiter=';')
             elif st.session_state['upload_file'] is not None:
                 try:
-                    df = pd.read_csv(st.session_state['file_path'], delimiter=',')
+                    df = pd.read_csv(st.session_state['upload_file'], delimiter=',')
                 except:
-                    df = pd.read_csv(st.session_state['file_path'], delimiter=';')
+                    df = pd.read_csv(st.session_state['upload_file'], delimiter=';')
         else:
             st.warning("File type Not supported")
         df = data_cleaning(df)
