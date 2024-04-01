@@ -259,9 +259,9 @@ elif st.session_state.page == 1:
                     df = pd.read_csv(st.session_state['file_path'], delimiter=';')
             elif st.session_state['upload_file'] is not None:
                 try:
-                    df = pd.read_csv(st.session_state['upload_file'], delimiter=',')
+                    df = pd.read_csv(st.session_state['upload_file'], delimiter=',').to_csv(st.session_state['upload_file'].name)
                 except:
-                    df = pd.read_csv(st.session_state['upload_file'], delimiter=';')
+                    df = pd.read_csv(st.session_state['upload_file'], delimiter=';').to_csv(st.session_state['upload_file'].name)
         else:
             st.warning("File type Not supported")
         df = data_cleaning(df)
