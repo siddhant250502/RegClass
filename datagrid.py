@@ -251,17 +251,17 @@ if st.session_state.page == 0:
 elif st.session_state.page == 1:
     st.button('Back to Datasets', on_click=back)
     with st.container(border=True):
-        if (st.session_state['file_path'] is not None and st.session_state['file_path'][-3:]=="csv") or (st.session_state['upload_file'] is not None and (st.session_state['upload_file'].name)[-3:]=="csv"):
-            if st.session_state['file_path'] is not None:
-                try:
-                    df = pd.read_csv(st.session_state['file_path'], delimiter=',')
-                except:
-                    df = pd.read_csv(st.session_state['file_path'], delimiter=';')
-            elif st.session_state['upload_file'] is not None:
-                try:
-                    df = pd.read_csv(st.session_state['upload_file'], delimiter=',').to_csv(st.session_state['upload_file'].name)
-                except:
-                    df = pd.read_csv(st.session_state['upload_file'], delimiter=';').to_csv(st.session_state['upload_file'].name)
+        # if (st.session_state['file_path'] is not None and st.session_state['file_path'][-3:]=="csv") or (st.session_state['upload_file'] is not None and (st.session_state['upload_file'].name)[-3:]=="csv"):
+        if st.session_state['file_path'] is not None:
+            try:
+                df = pd.read_csv(st.session_state['file_path'], delimiter=',')
+            except:
+                df = pd.read_csv(st.session_state['file_path'], delimiter=';')
+        elif st.session_state['upload_file'] is not None:
+            try:
+                df = pd.read_csv(st.session_state['upload_file'], delimiter=',').to_csv(st.session_state['upload_file'].name)
+            except:
+                df = pd.read_csv(st.session_state['upload_file'], delimiter=';').to_csv(st.session_state['upload_file'].name)
         else:
             st.warning("File type Not supported")
         df = data_cleaning(df)
