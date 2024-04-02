@@ -107,7 +107,10 @@ def regre(df):
             pass
         with open('model.pkl', 'wb') as f:
             pickle.dump(rfr, f)
-        y_pred = rfr.predict(X_test)
+        try:
+            y_pred = rfr.predict(X_test)
+        except:
+            st.warning("Can't predict")
         st.session_state.predicted = y_pred
         mse = mean_squared_error(y_test, y_pred)
         rmse = mse**0.5
@@ -142,7 +145,10 @@ def regre(df):
             pass
         with open('model.pkl', 'wb') as f:
             pickle.dump(rfc, f)
-        y_pred = rfc.predict(X_test)
+        try:
+            y_pred = rfc.predict(X_test)
+        except:
+            st.warning("Can't predict")
         st.session_state.predicted = y_pred
         progress_bar = st.progress(0)
         status_text = st.empty()
