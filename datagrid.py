@@ -110,7 +110,7 @@ def regre(df):
         try:
             y_pred = rfr.predict(X_test)
         except:
-            st.warning("Can't predict")
+           st.warning("Can't predict due to some error in the Dependant/Independant Variable")
         st.session_state.predicted = y_pred
         mse = mean_squared_error(y_test, y_pred)
         rmse = mse**0.5
@@ -148,7 +148,7 @@ def regre(df):
         try:
             y_pred = rfc.predict(X_test)
         except:
-            st.warning("Can't predict")
+            st.warning("Can't predict due to some error in the Dependant/Independant Variable")
         st.session_state.predicted = y_pred
         progress_bar = st.progress(0)
         status_text = st.empty()
