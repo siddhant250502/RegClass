@@ -23,8 +23,7 @@ if "page" not in st.session_state:
     st.session_state.page = 0
 if 'file_path' not in st.session_state:
     st.session_state['file_path'] = ' '
-# if 'upload_file' not in st.session_state:
-#     st.session_state['upload_file'] = None
+
 if 'reg' not in st.session_state:
     st.session_state['reg'] = False
     
@@ -93,7 +92,10 @@ def regre(df):
 
     if len(y.unique()) >= 10:
         rfr = RandomForestRegressor()
-        rfr.fit(X_train, y_train)
+        try:
+            rfr.fit(X_train, y_train)
+        except ValueError:
+            st.warning('Columns not proper')
         try:
             importances = rfr.feature_importances_
             forest_importances = pd.Series(importances, index=X.columns)
@@ -121,26 +123,14 @@ def regre(df):
         with col7.container(border=True):
             acc = rfr.score(X_test, y_test)*100
             st.info(f'''**Error Margin**: {rmse.round(3)} \n\n **Accuracy**: {acc.round(2)}% \n\n **Time Took**: {round((time.time()-start),2)} secs''')
-            num_steps = 100  
-            colors = []
-            for i in range(num_steps):
-                red = 1.0 if i < num_steps / 2 else 1.0 - (2.0 * (i - num_steps / 2) / num_steps)
-                green = 1.0 - abs(i - num_steps / 2) / num_steps
-                blue = 1.0 if i >= num_steps / 2 else 1.0 - (2.0 * (num_steps / 2 - i) / num_steps)
-                colors.append((red, green, blue))
-            colors[int(acc)] = (0,0,0)
-            plt.figure(figsize=(30, 12))
-            plt.imshow([colors], extent=[0, num_steps, 0, 1])
-            plt.axis('off')
-            # st.write('**Accuracy**')
-            # st.pyplot(plt, use_container_width=True)
-            # st.write("**Error Margin**")
-            # st.slider("",y.min(),y.max(),rmse, disabled=True)
             
             
     else:
         rfc = RandomForestClassifier()
-        rfc.fit(X_train, y_train)
+        try:
+            rfc.fit(X_train, y_train)
+        except ValueError:
+            st.warning('Columns not proper')
         try:
             importances = rfc.feature_importances_
             forest_importances = pd.Series(importances, index=X.columns)
@@ -166,20 +156,6 @@ def regre(df):
         col6, col7 = st.columns([3,1])
         with col7.container(border=True):
             st.info(f'''**Accuracy**: {round(acc, 2)*100}% \n\n **Time Took**: {round((time.time()-start),2)} secs''') 
-            # st.write('Accuracy of Model')
-            # num_steps = 100  
-            # colors = []
-            # for i in range(num_steps):
-            #     red = 1.0 if i < num_steps / 2 else 1.0 - (2.0 * (i - num_steps / 2) / num_steps)
-            #     green = 1.0 - abs(i - num_steps / 2) / num_steps
-            #     blue = 1.0 if i >= num_steps / 2 else 1.0 - (2.0 * (num_steps / 2 - i) / num_steps)
-            #     colors.append((red, green, blue))
-            # colors[round(accuracy_score(y_test,y_pred)*100)] = (0,0,0)
-            # plt.figure(figsize=(10, 2))
-            # plt.imshow([colors], extent=[0, num_steps, 0, 1])
-            # plt.axis('off')
-            # st.pyplot(plt, use_container_width=True)
-            # st.slider("",0.0,100.0,acc*100, disabled=True)
         with col6.container(border=True):
             st.write("\n\n")
             st.info("**Confusion Matrix**")
@@ -266,13 +242,8 @@ elif st.session_state.page == 1:
         else:
             st.warning("File type Not supported")
         df = data_cleaning(df)
-        y = df[df.columns[-1]]
-        unique_vals = len(y.unique())
-        
-        # if unique_vals>=7:
-        #     m = 'Regression'
-        # else:
-        #     m = 'Classification'
+
+
         st.title('AI Model Analysis')
         if 'button_clicked' not in st.session_state:
             st.session_state.button_clicked = None
@@ -305,9 +276,13 @@ elif st.session_state.page == 1:
                         indep_vars = st.multiselect('Independent Variables', df.columns.values, placeholder = "Choose an option")
                 with col5.container(border=True):
                     dep_vars = st.multiselect('Dependent Variables', options=[x for x in df.columns.values if x not in indep_vars], placeholder = "Choose an option", max_selections=1)
-
-                with col9:
-                    perf_reg = st.button(f'Perform AI Model')
+                unique_vals = len(np.unique(df[dep_vars]))
+                if unique_vals<=7:
+                    with col9:
+                        perf_reg = st.button('Classification')
+                else:
+                    with col9:
+                        perf_reg = st.button('Regression')
                 st.session_state.indep_vars, st.session_state.dep_vars = indep_vars, dep_vars
                 if len(indep_vars)>=1 and len(dep_vars)>=1:
                     data = df[indep_vars+dep_vars]
@@ -330,8 +305,6 @@ elif st.session_state.page == 1:
                     
                     model = pickle.load(open('model.pkl', 'rb'))
                     pred = model.predict([slider_val])
-                    
-                    # st.write('---')
                     
                     num_steps = 100  
                     colors = []
