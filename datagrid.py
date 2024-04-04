@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import datetime
-import sklearn
+import plotly.express as px
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix
@@ -63,26 +63,22 @@ def data_cleaning(data1):
         data1[i].fillna(data1[i].median(), inplace=True)
     return data1
 
-def check_mc(X):
-    X_mean = X.mean()
-    X_std = X.std()
-    Z = (X-X_mean)/X_std
-    c = Z.cov()
-    eigenvalues, eigenvectors = np.linalg.eig(c)
-    idx = eigenvalues.argsort()[::-1] 
-    eigenvalues = eigenvalues[idx]
-    eigenvectors = eigenvectors[:,idx]
-    explained_var = np.cumsum(eigenvalues) / np.sum(eigenvalues)
-    n_components = np.argmax(explained_var >= 0.5)
-    st.write(Z)
-    pca = PCA(n_components=n_components)
-    pca.fit(Z)
-    x_pca = pca.transform(Z)
+def interactive_plot(df):
+    x_axis = st.selectbox('X-axis', options=df.columns)
+    y_axis = st.selectbox('Y-axis', options=df.columns)
     
-    X = pd.DataFrame(x_pca,
-                     columns = ['PC{}'.format(i+1) for i in range(n_components)])
-    return X
+    if x_axis and y_axis:
+        fig = px.scatter(df, x=x_axis, y=y_axis)
+        st.plotly_chart(fig, use_container_width=True)
 
+def plot_columns(df, opt):
+    fig = px.bar(df,y=opt)
+    st.plotly_chart(fig, use_container_width=True)
+    
+def correlation(df):
+    fig = px.imshow(df.corr(), text_auto=True, aspect='auto')
+    st.plotly_chart(fig, use_container_width=True)
+    
 def regre(df):
     start = time.time()
     df = data_cleaning(df)
@@ -110,7 +106,7 @@ def regre(df):
         try:
             y_pred = rfr.predict(X_test)
         except:
-           st.warning("Can't predict due to some error in the Dependant/Independant Variable")
+            st.warning("Can't predict")
         st.session_state.predicted = y_pred
         mse = mean_squared_error(y_test, y_pred)
         rmse = mse**0.5
@@ -272,9 +268,24 @@ elif st.session_state.page == 1:
                 
         # Update content based on button click
         if st.session_state.button_clicked == 1:
-            with st.container(border=True):
-                pr = ProfileReport(df)
-                st_profile_report(pr)
+            option = st.radio('Choose any feature', options=['Data Statistics', 'Data Header', 'Correlation Matrix', 'Plot'])
+            if option == 'Data Statistics':
+                with st.container(border=True):
+                    st.dataframe(df.describe(), use_container_width=True)
+                    opt = st.selectbox('Select any Column', options=df.columns)
+                    if opt:
+                        plot_columns(df, opt)
+            elif option=='Data Header':
+                with st.container(border=True):
+                    st.subheader('Header of the DataSet')
+                    st.dataframe(df.head(10), hide_index=True, use_container_width=True)
+            elif option=='Correlation Matrix':
+                with st.container(border=True):
+                    correlation(df)
+            elif option=='Plot':
+                with st.container(border=True):
+                    st.subheader('Scatter Plot')
+                    interactive_plot(df)
             
         elif st.session_state.button_clicked == 2:
             try:
