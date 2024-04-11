@@ -1,7 +1,7 @@
 numpy
 pandas
 scikit-learn
-
+streamlit-option-menu
 DateTime
 plotly
 TIME-python
