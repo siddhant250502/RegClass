@@ -230,7 +230,7 @@ if st.session_state.page == 0:
                                         "Timestamp": st.column_config.Column(width="large")},
                         hide_index=True, 
                         use_container_width=True,
-                        num_rows='dynamic'
+                        
                         )
     st.session_state['file_path'] = res.loc[res.Select.idxmax()]['File Name']
     upload_file = st.file_uploader("Upload your dataset", type=['csv'])
