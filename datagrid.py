@@ -20,9 +20,7 @@ import toml
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 # with open('style.scss') as f:
 #     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
-        
-with open('.streamlit/config.toml', 'r') as f:
-    config = toml.load(f)
+
 
 if "page" not in st.session_state:
     st.session_state.page = 0
@@ -215,7 +213,6 @@ if st.session_state.page == 0:
         os.remove(path=file)
     st.image('https://datalyzer.b-cdn.net/wp-content/uploads/2022/01/logo-3.png.webp', width=100)
     st.title('List of Datasets')
-    st.write(config['theme']['base'])
     cwd = os.getcwd()
     files = os.listdir(cwd)
     documents = [f for f in files if os.path.isfile(os.path.join(cwd, f)) and f[-3:] == 'csv']
