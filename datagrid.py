@@ -20,7 +20,9 @@ import toml
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 # with open('style.scss') as f:
 #     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
-
+        
+with open('.streamlit/config.toml', 'r') as f:
+    config = toml.load(f)
 
 if "page" not in st.session_state:
     st.session_state.page = 0
@@ -70,16 +72,18 @@ def interactive_plot(df):
     y_axis = st.selectbox('Y-axis', options=df.columns)
     
     if x_axis and y_axis:
-        fig = px.scatter(df, x=x_axis, y=y_axis)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=df[x_axis], y=df[y_axis], marker_color='#30B9EF', mode='markers'))
         st.plotly_chart(fig, use_container_width=True)
 
 def plot_columns(df, opt):
-    fig = px.bar(df,y=opt)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=df[opt]))
+    fig.update_traces(marker_color='#30B9EF')
     st.plotly_chart(fig, use_container_width=True)
     
 def correlation(df):
-    fig = px.imshow(df.corr(), text_auto=True, aspect='auto')
-    # fig.update_coloraxes(showscale=False)
+    fig = px.imshow(df.corr(), text_auto=True, aspect='auto', color_continuous_scale='RdBu_r')
     st.plotly_chart(fig, use_container_width=True)
     
 def check_mc(X):
@@ -312,7 +316,6 @@ elif st.session_state.page == 1:
                 orientation='horizontal'
             )
                 if option == 'Data Statistics':
-                
                     st.subheader('Dataset statistics')
                     with st.expander('Click me to see statistical info of the dataset'):
                         st.dataframe(df.describe(), use_container_width=True)
@@ -321,15 +324,15 @@ elif st.session_state.page == 1:
                     opt = st.selectbox('Select any Column', options=df.columns)
                     if opt:
                         plot_columns(df, opt)
+                        
                 elif option=='Data Header':
-                    
                         st.subheader('Header of the DataSet')
                         st.dataframe(df.head(10), hide_index=True, use_container_width=True)
+                        
                 elif option=='Correlation Matrix':
-                    
                         correlation(df)
-                elif option=='Plot':
-                    
+                        
+                elif option=='Plot':                    
                         st.subheader('Scatter Plot')
                         interactive_plot(df)
             
