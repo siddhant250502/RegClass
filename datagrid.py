@@ -14,6 +14,7 @@ from streamlit_pandas_profiling import st_profile_report
 from ydata_profiling import ProfileReport
 import matplotlib.pyplot as plt
 import pickle
+from streamlit_option_menu import option_menu
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 # with open('style.scss') as f:
@@ -62,7 +63,6 @@ def data_cleaning(data1):
     for i in data1.columns:
         data1[i].fillna(data1[i].median(), inplace=True)
     return data1
-
 def interactive_plot(df):
     x_axis = st.selectbox('X-axis', options=df.columns)
     y_axis = st.selectbox('Y-axis', options=df.columns)
@@ -77,8 +77,29 @@ def plot_columns(df, opt):
     
 def correlation(df):
     fig = px.imshow(df.corr(), text_auto=True, aspect='auto')
+    # fig.update_coloraxes(showscale=False)
     st.plotly_chart(fig, use_container_width=True)
     
+def check_mc(X):
+    X_mean = X.mean()
+    X_std = X.std()
+    Z = (X-X_mean)/X_std
+    c = Z.cov()
+    eigenvalues, eigenvectors = np.linalg.eig(c)
+    idx = eigenvalues.argsort()[::-1] 
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:,idx]
+    explained_var = np.cumsum(eigenvalues) / np.sum(eigenvalues)
+    n_components = np.argmax(explained_var >= 0.5)
+    st.write(Z)
+    pca = PCA(n_components=n_components)
+    pca.fit(Z)
+    x_pca = pca.transform(Z)
+    
+    X = pd.DataFrame(x_pca,
+                     columns = ['PC{}'.format(i+1) for i in range(n_components)])
+    return X
+
 def regre(df):
     start = time.time()
     df = data_cleaning(df)
@@ -188,7 +209,7 @@ def plot_chart(y_test, y_pred):
 if st.session_state.page == 0:
     def delete_but(file):
         os.remove(path=file)
-        
+    st.image('https://datalyzer.b-cdn.net/wp-content/uploads/2022/01/logo-3.png.webp', width=100)
     st.title('List of Datasets')
     cwd = os.getcwd()
     files = os.listdir(cwd)
@@ -255,6 +276,15 @@ elif st.session_state.page == 1:
         col9, col10, col11, col12 = st.columns([0.4, 0.4, 0.3, 0.7])
         # Define the buttons
         
+        # option = option_menu(
+        #     menu_title=None,
+        #     options=['Dataset Info', 'AI Model', 'Predictor'],
+        #     icons=['clipboard2-data', 'bezier','bullseye'],
+        #     menu_icon=None,
+        #     default_index=1,
+        #     orientation='horizontal'
+        # )
+        
         with col1:
             if st.button('Dataset Info'):
                 st.session_state.button_clicked = 1
@@ -268,24 +298,36 @@ elif st.session_state.page == 1:
                 
         # Update content based on button click
         if st.session_state.button_clicked == 1:
-            option = st.radio('Choose any feature', options=['Data Statistics', 'Data Header', 'Correlation Matrix', 'Plot'])
-            if option == 'Data Statistics':
-                with st.container(border=True):
-                    st.dataframe(df.describe(), use_container_width=True)
+            with st.container(border=True):
+                option = option_menu(
+                menu_title=None,
+                options=['Data Statistics', 'Data Header', 'Correlation Matrix', 'Plot'],
+                icons=['bar-chart-line', 'table','diagram-2','graph-up'],
+                menu_icon=None,
+                default_index=1,
+                orientation='horizontal'
+            )
+                if option == 'Data Statistics':
+                
+                    st.subheader('Dataset statistics')
+                    with st.expander('Click me to see statistical info of the dataset'):
+                        st.dataframe(df.describe(), use_container_width=True)
+                        st.write('----')
+                    st.subheader('Column Distribution ')
                     opt = st.selectbox('Select any Column', options=df.columns)
                     if opt:
                         plot_columns(df, opt)
-            elif option=='Data Header':
-                with st.container(border=True):
-                    st.subheader('Header of the DataSet')
-                    st.dataframe(df.head(10), hide_index=True, use_container_width=True)
-            elif option=='Correlation Matrix':
-                with st.container(border=True):
-                    correlation(df)
-            elif option=='Plot':
-                with st.container(border=True):
-                    st.subheader('Scatter Plot')
-                    interactive_plot(df)
+                elif option=='Data Header':
+                    
+                        st.subheader('Header of the DataSet')
+                        st.dataframe(df.head(10), hide_index=True, use_container_width=True)
+                elif option=='Correlation Matrix':
+                    
+                        correlation(df)
+                elif option=='Plot':
+                    
+                        st.subheader('Scatter Plot')
+                        interactive_plot(df)
             
         elif st.session_state.button_clicked == 2:
             try:
