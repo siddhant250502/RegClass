@@ -255,6 +255,7 @@ if st.session_state.page == 0:
 
 
 elif st.session_state.page == 1:
+    st.image('https://datalyzer.b-cdn.net/wp-content/uploads/2022/01/logo-3.png.webp', width=100)
     st.button('Back to Datasets', on_click=back)
     with st.container(border=True):
         if st.session_state['file_path'] is not None:
