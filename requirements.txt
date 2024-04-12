@@ -10,4 +10,4 @@ streamlit_pandas_profiling
 ydata_profiling
 matplotlib
 
-math
+
