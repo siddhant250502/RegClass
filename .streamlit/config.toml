@@ -1,7 +1,7 @@
 [theme]
 primaryColor="#30B9EF"
 backgroundColor="#FFFFFF"
-secondaryBackgroundColor="#F0F2F6"
+secondaryBackgroundColor="#e1ecf5"
 textColor="#313131"
-font="sans serif; Roboto"
+font="sans serif"
 base="light"
