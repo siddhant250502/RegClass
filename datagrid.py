@@ -358,18 +358,11 @@ elif st.session_state.page == 1:
 
     with st.container(border=True):
         if st.session_state['file_path'] is not None:
-            try:
-                df = pd.read_csv(st.session_state['file_path'], delimiter=',')
-            except:
-                df = pd.read_csv(st.session_state['file_path'], delimiter=';')
+            df = pd.read_csv(st.session_state['file_path'])
         else:
             st.warning("File type Not supported")
         df = data_cleaning(df)
-        df['Exclude/Include'] = True
-        
-
-
-            
+        df['Exclude/Include'] = True    
         col1, col2, col3 = st.columns([0.1,0.1,0.5])
  
         
@@ -454,8 +447,17 @@ elif st.session_state.page == 1:
                             temp_df = temp_df[temp_df[opt]<=max]
                             new_df = pd.concat([temp_df, new_df])
                             new_df = new_df[new_df.columns[:len(st.session_state['filter_df'].columns)]]
-                        st.subheader('Filtered Dataset Preview')   
+                        with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                        ):
+                            st.subheader('Filtered Dataset Preview')   
                         st.dataframe(new_df, use_container_width=True, hide_index=True)     
+                        st.session_state['filter_df'] = new_df
                         
                 elif option=='Plot':    
                     with stylable_container(
@@ -495,7 +497,7 @@ elif st.session_state.page == 1:
                         ):
                             st.subheader('Filtered Dataset Preview')
                         # st.session_state['filter_df']['Exclude/Include'][pntind] = True
-                        st.write(st.session_state['filter_df'].iloc[pntind])
+                        st.dataframe(st.session_state['filter_df'].iloc[pntind], use_container_width=True, hide_index=True)
                         
                     
                 elif option=='Correlation Matrix':
@@ -508,16 +510,17 @@ elif st.session_state.page == 1:
                         """
                     ):
                         st.subheader('Correlation Matrix Heatmap')
-                    heatmap = correlation(st.session_state['filter_df'].drop(['Exclude/Include'], axis=1))
+                    heatmap = correlation(st.session_state['filter_df'])
                     heatmap_selected = plotly_events(
                         heatmap,
-                        select_event=True
+                        click_event=True
                     )
                     
                     if heatmap_selected:
                         st.session_state['col_name'].add(heatmap_selected[0]['x'])
                         st.session_state['col_name'].add(heatmap_selected[0]['y'])
                     cols = list(st.session_state['col_name'])
+                    st.write(st.session_state['col_name'])
                     if st.button('Preview'):
                         with stylable_container(
                         key='h3',
@@ -528,19 +531,23 @@ elif st.session_state.page == 1:
                         """
                         ):
                             st.subheader('Filtered Dataset Preview')
-                        st.write(st.session_state['filter_df'][cols])
-                
+                        st.dataframe(st.session_state['filter_df'][cols], use_container_width=True, hide_index=True)
+                        st.session_state['filter_df'] = st.session_state['filter_df'][cols]
+                        
+            
                         
         elif option=='AI Model':
+            if st.session_state['file_path'] is None:
+                st.session_state['file_path'] = st.session_state['filter_df']
             st.title('AI Model Analysis')
             col4, col5  = st.columns([1,1])
             col9, col10, col11, col12 = st.columns([0.4, 0.4, 0.3, 0.7])
             # try:
             with col4.container(border=True):
-                    indep_vars = st.multiselect('Independent Variables', df.columns.values, placeholder = "Choose an option")
+                    indep_vars = st.multiselect('Independent Variables', st.session_state['filter_df'].columns.values, placeholder = "Choose an option")
             with col5.container(border=True):
-                dep_vars = st.multiselect('Dependent Variables', options=[x for x in df.columns.values if x not in indep_vars], placeholder = "Choose an option", max_selections=1)
-            unique_vals = len(np.unique(df[dep_vars]))
+                dep_vars = st.multiselect('Dependent Variables', options=[x for x in st.session_state['filter_df'].columns.values if x not in indep_vars], placeholder = "Choose an option", max_selections=1)
+            unique_vals = len(np.unique(st.session_state['filter_df'][dep_vars]))
             if unique_vals<=7:
                 with col9:
                     perf_reg = st.button('Classification')
@@ -549,7 +556,7 @@ elif st.session_state.page == 1:
                     perf_reg = st.button('Regression')
             st.session_state.indep_vars, st.session_state.dep_vars = indep_vars, dep_vars
             if len(indep_vars)>=1 and len(dep_vars)>=1:
-                data = df[indep_vars+dep_vars]
+                data = st.session_state['filter_df'][indep_vars+dep_vars]
             if perf_reg:
                 regre(data)
                 st.session_state.reg = True
