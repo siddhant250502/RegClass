@@ -321,32 +321,30 @@ if st.session_state.page == 0:
 
 
 elif st.session_state.page == 1:
-    st.button('Back to Datasets', on_click=back)
-    st.markdown(
-    """
-    <style>
-    button {
-        background: none!important;
-        border: none;
-        padding: 0!important;
-        color: black ;
-        text-decoration: none;
-        cursor: pointer;
-        border: none !important;
-    }
-    button:hover {
-        color: 30B9EF ;
-        border: solid 1px black;
-    }
-    button:focus {
-        outline: 1px black !important;
-        color: 30B9EF !important;
-        border: solid 1px black;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-    )
+    with stylable_container(
+        key='btn',
+        css_styles="""
+            button {
+                background: none!important;
+                border: none;
+                padding: 0!important;
+                color: black ;
+                text-decoration: none;
+                cursor: pointer;
+                border: none !important;
+                }
+            button:hover {
+                color: 30B9EF ;
+                border: solid 1px black;
+            }
+            button:focus {
+                outline: 1px black !important;
+                color: 30B9EF !important;
+                border: solid 1px black;
+            }
+        """
+    ):
+        st.button('Back to Datasets', on_click=back)
 
     with st.container(border=True):
         if st.session_state['file_path'] is not None:
