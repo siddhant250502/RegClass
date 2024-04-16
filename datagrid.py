@@ -18,7 +18,6 @@ from streamlit_option_menu import option_menu
 import toml
 import math
 from streamlit_extras.stylable_container import stylable_container
-from agstyler import *
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 with open('style.css') as f:
