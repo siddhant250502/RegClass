@@ -22,6 +22,18 @@ from streamlit_extras.stylable_container import stylable_container
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 with open('style.css') as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+hide_streamlit_style = """
+<style>
+#MainMenu {
+    visibility: hidden;
+    }
+footer {
+    visibility: hidden;
+    }
+</style>
+
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
         
 with open('.streamlit/config.toml', 'r') as f:
     config = toml.load(f)
@@ -327,18 +339,17 @@ elif st.session_state.page == 1:
                 background: none!important;
                 border: none;
                 padding: 0!important;
-                color: black ;
+                color: black;
                 text-decoration: none;
                 cursor: pointer;
                 border: none !important;
                 }
             button:hover {
-                color: 30B9EF ;
+                color: #30B9EF ;
                 border: solid 1px black;
             }
             button:focus {
-                outline: 1px black !important;
-                color: 30B9EF !important;
+                color: #30B9EF ;
                 border: solid 1px black;
             }
         """
