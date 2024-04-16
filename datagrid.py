@@ -18,6 +18,7 @@ from streamlit_option_menu import option_menu
 import toml
 import math
 from streamlit_extras.stylable_container import stylable_container
+from agstyler import *
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 with open('style.css') as f:
@@ -328,19 +329,19 @@ elif st.session_state.page == 1:
         background: none!important;
         border: none;
         padding: 0!important;
-        color: black !important;
+        color: black ;
         text-decoration: none;
         cursor: pointer;
         border: none !important;
     }
     button:hover {
-        text-decoration: none;
-        color: black !important;
+        color: 30B9EF ;
+        border: solid 1px black;
     }
     button:focus {
-        outline: none !important;
-        box-shadow: none !important;
-        color: black !important;
+        outline: 1px black !important;
+        color: 30B9EF !important;
+        border: solid 1px black;
     }
     </style>
     """,
