@@ -12,16 +12,17 @@ import time
 from sklearn.decomposition import PCA
 import numpy as np
 from streamlit_plotly_events import plotly_events
-from ydata_profiling import ProfileReport
 import matplotlib.pyplot as plt
 import pickle
 from streamlit_option_menu import option_menu
 import toml
 import math
+from streamlit_extras.stylable_container import stylable_container
+from agstyler import *
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
-# with open('style.scss') as f:
-#     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
+with open('style.css') as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
         
 with open('.streamlit/config.toml', 'r') as f:
     config = toml.load(f)
@@ -36,6 +37,9 @@ if 'reg' not in st.session_state:
 
 if 'filter_df' not in st.session_state:
     st.session_state['filter_df'] = None
+
+if 'col_name' not in st.session_state:
+    st.session_state['col_name'] = set()
     
 def nextpage(): st.session_state.page += 1
 def restart(): st.session_state.page = 0
@@ -73,15 +77,29 @@ def data_cleaning(data1):
         data1[i].fillna(data1[i].median(), inplace=True)
     return data1
 
-def interactive_plot(df, x_axis, y_axis):
+def interactive_plot(df, x_axis, y_axis, ols, ewm, exchange):
     try:
         if x_axis and y_axis:
-            fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'])        
+            if exchange:
+                if ols:
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], marginal_x='histogram', marginal_y='box', trendline='ols', trendline_color_override='red', height=450) # trendline='ewm',trendline_options=dict(halflife=2),
+                if not ols and ewm:
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], marginal_x='histogram', marginal_y='box', trendline='ewm',trendline_options=dict(halflife=2), trendline_color_override='red', height=450)
+                elif not ewm and not ols:
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], marginal_x='histogram', marginal_y='box', height=450)
+            else:
+                if ols:
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], marginal_x='box', marginal_y='histogram', trendline='ols', trendline_color_override='red') # trendline='ewm',trendline_options=dict(halflife=2),
+                if not ols and ewm:
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], marginal_x='box', marginal_y='histogram', trendline='ewm',trendline_options=dict(halflife=2), trendline_color_override='red')
+                elif not ewm and not ols:
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], marginal_x='box', marginal_y='histogram')
+        fig.update_layout(title_text='Column Vs Column Scatter Plot')
         return fig
     except:
         st.warning('Please select the values')
         
-def plot_columns(df, opt):
+def plot_columns(df, opt, sigma):
     mean = statistics.mean(df[opt])
     stddev = statistics.stdev(df[opt])
     one_sigma_plus = mean+1*stddev
@@ -90,17 +108,18 @@ def plot_columns(df, opt):
     two_sigma_minus = mean-2*stddev
     three_sigma_plus = mean+3*stddev
     three_sigma_minus = mean-3*stddev
-    fig = px.histogram(df, x=opt, histnorm='probability density',  color_discrete_sequence=['#30B9EF'], orientation='v') #, histfunc='sum', 
     bin_width= 50
     nbins = math.ceil((df[opt].max() - df[opt].min()) / bin_width)
-    fig.update_traces(xbins_size=nbins)
-    fig.add_vline(mean, line_dash="dash")
-    fig.add_vrect(x0=one_sigma_minus, x1=one_sigma_plus, annotation_text='1-sigma', fillcolor="green", opacity=0.25)
-    # fig.add_vrect(x0=one_sigma_plus, x1=mean, annotation_text='one-sigma', fillcolor="green", opacity=0.25)
-    fig.add_vrect(x0=two_sigma_minus, x1=one_sigma_minus, fillcolor="#FFFF00", opacity=0.25)
-    fig.add_vrect(x0=two_sigma_plus, x1=one_sigma_plus, annotation_text='2-sigma', fillcolor="#FFFF00", opacity=0.25)
-    fig.add_vrect(x0=three_sigma_minus, x1=two_sigma_minus, fillcolor="purple", opacity=0.25)
-    fig.add_vrect(x0=three_sigma_plus, x1=two_sigma_plus, annotation_text='3-sigma', fillcolor="purple", opacity=0.25)
+    fig = px.histogram(df, x=opt, color_discrete_sequence=['#30B9EF'], orientation='v', nbins=nbins)
+    fig.update_traces(xbins_size=go.histogram.XBins(size=10))
+    if sigma:
+        fig.add_vline(mean, line_dash="dash",annotation_text="Mean", annotation_position="top right")
+        fig.add_vrect(x0=one_sigma_minus, x1=one_sigma_plus, annotation_text='1-sigma', fillcolor="#00FF00", opacity=0.2, line_width=0)
+        # fig.add_vrect(x0=one_sigma_plus, x1=mean, annotation_text='one-sigma', fillcolor="green", opacity=0.25)
+        fig.add_vrect(x0=two_sigma_minus, x1=one_sigma_minus, fillcolor="#FFFF00", opacity=0.2, line_width=0)
+        fig.add_vrect(x0=two_sigma_plus, x1=one_sigma_plus, annotation_text='2-sigma', fillcolor="#FFFF00", opacity=0.2, line_width=0)
+        fig.add_vrect(x0=three_sigma_minus, x1=two_sigma_minus, fillcolor="purple", opacity=0.2, line_width=0)
+        fig.add_vrect(x0=three_sigma_plus, x1=two_sigma_plus, annotation_text='3-sigma', fillcolor="#A020F0", opacity=0.2, line_width=0)
     fig.update_layout(bargap=0.1)
     return fig
     
@@ -148,7 +167,7 @@ def regre(df):
             forest_importances = forest_importances.sort_values(ascending=False)
             with st.container(border=True):
                 st.info("**Visualization of how each Independent variables Impact the Dependent variables**")
-                st.bar_chart(forest_importances, color='#1168f5')
+                st.bar_chart(forest_importances, color='#30B9EF')
         except:
             pass
         with open('model.pkl', 'wb') as f:
@@ -225,7 +244,7 @@ def regre(df):
 def plot_chart(y_test, y_pred):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=[i for i in range(50)], y=y_test[-50:], mode='markers', name='Testing points', line=dict(color="red")))
-    fig.add_trace(go.Scatter(x=[i for i in range(50)], y=y_pred[-50:], mode='lines', name='Regression Line',opacity=0.5, line=dict(color="blue")))
+    fig.add_trace(go.Scatter(x=[i for i in range(50)], y=y_pred[-50:], mode='lines', name='Regression Line',opacity=0.9, line=dict(color="#30B9EF")))
     fig.update_layout(
     title="Regression Analysis",
     xaxis_title="Test Data",
@@ -238,7 +257,7 @@ def plot_chart(y_test, y_pred):
 if st.session_state.page == 0:
     def delete_but(file):
         os.remove(path=file)
-    # st.image('https://datalyzer.b-cdn.net/wp-content/uploads/2022/01/logo-3.png.webp', width=100)
+
     st.title('List of Datasets')
     cwd = os.getcwd()
     files = os.listdir(cwd)
@@ -248,16 +267,33 @@ if st.session_state.page == 0:
             'File Name': documents,
             'Timestamp': [datetime.datetime.fromtimestamp(os.path.getatime(os.path.join(cwd, f))) for f in documents]
     })
+
     res = st.data_editor(data,
                         column_config={"Select": st.column_config.CheckboxColumn(default=False), 
                                         "File Name": st.column_config.Column(width="large"), 
                                         "Timestamp": st.column_config.Column(width="large")},
                         hide_index=True, 
                         use_container_width=True,
-                        
+                        height=350,
                         )
     st.session_state['file_path'] = res.loc[res.Select.idxmax()]['File Name']
-    upload_file = st.file_uploader("Upload your dataset", type=['csv'])
+    with stylable_container(
+        key='btn',
+        css_styles=["""
+            button {
+                
+                background-color: #30B9EF;
+                color: #fff;
+            }
+            """,
+            """
+                button:hover {
+                    background-color: #fff;
+                    color: #30B9EF;
+                }
+            """,]
+    ):
+        upload_file = st.file_uploader("Upload your dataset", type=['csv'])
     if upload_file is not None:
             if upload_file.name[-3:] == 'csv':
                 pd.read_csv(upload_file).to_csv(upload_file.name)
@@ -267,10 +303,11 @@ if st.session_state.page == 0:
     
     
     if len(res[res.Select == True])==1 or upload_file is not None:
-        col7, col8 = st.columns([0.1,1])
+        col7, col8, c9 = st.columns([1,0.055,0.07])
         with col8:
+            
             st.button("Next", on_click=nextpage, disabled=(st.session_state.page > 1))
-        with col7:
+        with c9:
             if st.button("Delete"):
                 if os.path.isfile(st.session_state['file_path']):
                     ind = res.index[res['File Name']==st.session_state['file_path']]
@@ -278,15 +315,39 @@ if st.session_state.page == 0:
                     st.rerun()
                 else:
                     st.warning("File doesn't exist")
-        
     else:
         st.write('Please select only 1 option / database')
     
 
 
 elif st.session_state.page == 1:
-    # st.image('https://datalyzer.b-cdn.net/wp-content/uploads/2022/01/logo-3.png.webp', width=100)
     st.button('Back to Datasets', on_click=back)
+    st.markdown(
+    """
+    <style>
+    button {
+        background: none!important;
+        border: none;
+        padding: 0!important;
+        color: black !important;
+        text-decoration: none;
+        cursor: pointer;
+        border: none !important;
+    }
+    button:hover {
+        text-decoration: none;
+        color: black !important;
+    }
+    button:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        color: black !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+    )
+
     with st.container(border=True):
         if st.session_state['file_path'] is not None:
             try:
@@ -296,8 +357,8 @@ elif st.session_state.page == 1:
         else:
             st.warning("File type Not supported")
         df = data_cleaning(df)
-        # df['Exclude/Include'] = False
-        st.session_state['filter_df'] = df
+        df['Exclude/Include'] = True
+        
 
 
             
@@ -306,71 +367,108 @@ elif st.session_state.page == 1:
         
         option = option_menu(
                 menu_title=None,
-                options=['Data Header', 'Data Statistics', 'Plot'],
-                icons=['bar-chart-line', 'table', 'graph-up'],
+                options=['Dataset Info', 'AI Model', 'Predictor'],
+                icons=['1-square', '2-square', '3-square'],
                 menu_icon=None,
                 default_index=0,
                 orientation='horizontal'
             )
-        
-        # with col1:
-        #     if st.button('Dataset Info'):
-        #         st.session_state.button_clicked = 1
-        # with col2:
-        #     if st.button('AI Model'):
-        #         st.session_state.button_clicked = 2
-        # with col3:
-        #     if st.button('Predictor'):
-        #         st.session_state.button_clicked = 3
-                
-                
+                   
         # Update content based on button click
-        if option=='Data Header':
+        if option=='Dataset Info':
             with st.container(border=True):
                 option = option_menu(
                 menu_title=None,
                 options=['Data Header', 'Data Statistics', 'Plot', 'Correlation Matrix'],
-                icons=['bar-chart-line', 'table', 'graph-up', 'diagram-2'],
+                icons=['table', 'bar-chart-line', 'graph-up', 'diagram-2'],
                 menu_icon=None,
                 default_index=0,
                 orientation='horizontal'
             )
                 if option=='Data Header':
-                    st.subheader('Header of the DataSet')
-                    st.dataframe(st.session_state['filter_df'], use_container_width=True, hide_index=True)
-                    # st.session_state['filter_df'] = st.data_editor(
-                    #     st.session_state['filter_df'],
-                    #     column_config={
-                    #         "Exclude/Include": st.column_config.CheckboxColumn(default=True)
-                    #     },
-                    #     use_container_width=True,
-                    #     hide_index=True
-                    # )
+                    with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                        st.subheader('Header of the DataSet')
+                    st.session_state['filter_df'] = st.data_editor(
+                        df,
+                        column_config={
+                            "Exclude/Include": st.column_config.CheckboxColumn(default=True)
+                        },
+                        use_container_width=True,
+                        hide_index=True, 
+                        height=350,
+                    )
+                    st.session_state['filter_df'] = st.session_state['filter_df'][st.session_state['filter_df']['Exclude/Include']==True]
                 
                 elif option == 'Data Statistics':
-                    st.subheader('Dataset statistics')
-                    with st.expander('Click me to see statistical info of the dataset'):
+                    with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                        st.subheader('Dataset statistics')
+                    with st.expander('Statistical info of the dataset'):
                         st.dataframe(st.session_state['filter_df'].describe(), use_container_width=True)
                         st.write('----')
-                    st.subheader('Column Distribution ')
+                    with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                        st.subheader('Column Distribution ')
                     opt = st.selectbox('Select any Column', options=df.columns)
+                    sigma = st.checkbox('Show Sigma areas')
                     if opt:
-                        bar_chart = plot_columns(st.session_state['filter_df'], opt)
+                        bar_chart = plot_columns(st.session_state['filter_df'], opt, sigma)
                         bar_chart_selected = plotly_events(
                             bar_chart,
                             select_event=True
                         )
-                    pntind = []
+                    # pntind = []
+                    new_df = pd.DataFrame(None, columns=[st.session_state['filter_df'].columns])
                     if bar_chart_selected:
-                        st.write(bar_chart_selected)    
-                        
+                        for i in range(len(bar_chart_selected)):
+                            min = bar_chart_selected[i]['x']-0.5
+                            max = bar_chart_selected[i]['x']+0.4
+                            temp_df = st.session_state['filter_df'][st.session_state['filter_df'][opt]>=min]
+                            temp_df = temp_df[temp_df[opt]<=max]
+                            new_df = pd.concat([temp_df, new_df])
+                            new_df = new_df[new_df.columns[:len(st.session_state['filter_df'].columns)]]
+                        st.subheader('Filtered Dataset Preview')   
+                        st.dataframe(new_df, use_container_width=True, hide_index=True)     
                         
                 elif option=='Plot':    
-                    
-                    st.subheader('Scatter Plot')
-                    x_axis = st.selectbox('X-axis', options=df.columns)
-                    y_axis = st.selectbox('Y-axis', options=df.columns)
-                    scatter_chart = interactive_plot(df, x_axis, y_axis)
+                    with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                        st.subheader('Scatter Plot')
+                    x_axis = st.selectbox('X-axis', options=st.session_state['filter_df'].columns)
+                    y_axis = st.selectbox('Y-axis', options=st.session_state['filter_df'].columns)
+                    c1, c2, c3 = st.columns(3)
+                    with c1:
+                        ols = st.checkbox('Least-Squared line')
+                    with c2:
+                        ewm = st.checkbox('Estimated Weighted Mean Line')
+                    with c3:
+                        exchange = st.checkbox('Inter-Change axes')
+                    scatter_chart = interactive_plot(st.session_state['filter_df'], x_axis, y_axis, ols, ewm, exchange)
                     scatter_chart_selected = plotly_events(
                         scatter_chart,
                         select_event=True,
@@ -379,31 +477,53 @@ elif st.session_state.page == 1:
                     if scatter_chart_selected:
                         for i in range(len(scatter_chart_selected)):
                             pntind.append(scatter_chart_selected[i]['pointIndex'])
-                        st.subheader('Filtered Dataset Preview')
+                        with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                        ):
+                            st.subheader('Filtered Dataset Preview')
                         # st.session_state['filter_df']['Exclude/Include'][pntind] = True
-                        st.write(df.iloc[pntind])
+                        st.write(st.session_state['filter_df'].iloc[pntind])
                         
+                    
                 elif option=='Correlation Matrix':
-                    heatmap = correlation(df)
+                    with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                        st.subheader('Correlation Matrix Heatmap')
+                    heatmap = correlation(st.session_state['filter_df'].drop(['Exclude/Include'], axis=1))
                     heatmap_selected = plotly_events(
                         heatmap,
-                        click_event=True
+                        select_event=True
                     )
-                    col_name = []
-                    if heatmap_selected:
-                        col_name.append(heatmap_selected[0]['x'])
-                        col_name.append(heatmap_selected[0]['y'])
-                        # st.write(col_name)
-                        if heatmap_selected[0]['x'] == heatmap_selected[0]['y']:
-                            st.subheader('Filtered Dataset Preview')
-                            st.write(df[heatmap_selected[0]['x']])
-                        else:
-                            st.subheader('Filtered Dataset Preview')
-                            st.write(df[[heatmap_selected[0]['x'], heatmap_selected[0]['y']]])
                     
+                    if heatmap_selected:
+                        st.session_state['col_name'].add(heatmap_selected[0]['x'])
+                        st.session_state['col_name'].add(heatmap_selected[0]['y'])
+                    cols = list(st.session_state['col_name'])
+                    if st.button('Preview'):
+                        with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                        ):
+                            st.subheader('Filtered Dataset Preview')
+                        st.write(st.session_state['filter_df'][cols])
                 
                         
-        elif option=='Data Statistics':
+        elif option=='AI Model':
             st.title('AI Model Analysis')
             col4, col5  = st.columns([1,1])
             col9, col10, col11, col12 = st.columns([0.4, 0.4, 0.3, 0.7])
@@ -415,10 +535,10 @@ elif st.session_state.page == 1:
             unique_vals = len(np.unique(df[dep_vars]))
             if unique_vals<=7:
                 with col9:
-                    perf_reg = st.button('Regression')
+                    perf_reg = st.button('Classification')
             else:
                 with col9:
-                    perf_reg = st.button('Classification')
+                    perf_reg = st.button('Regression')
             st.session_state.indep_vars, st.session_state.dep_vars = indep_vars, dep_vars
             if len(indep_vars)>=1 and len(dep_vars)>=1:
                 data = df[indep_vars+dep_vars]
@@ -431,7 +551,7 @@ elif st.session_state.page == 1:
             #     if len(dep_vars) == 0:
             #         st.warning('Choose Dependent variable')
                     
-        elif option=='Plot':
+        elif option=='Predictor':
             if st.session_state.reg:
                 try:
                     with st.container(border=True):
