@@ -457,7 +457,8 @@ elif st.session_state.page == 1:
                         ):
                             st.subheader('Filtered Dataset Preview')   
                         st.dataframe(new_df, use_container_width=True, hide_index=True)     
-                        st.session_state['filter_df'] = new_df
+                        if st.button('Select'):
+                            st.session_state['filter_df'] = new_df
                         
                 elif option=='Plot':    
                     with stylable_container(
