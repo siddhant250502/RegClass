@@ -3,6 +3,7 @@ pandas
 scikit-learn
 streamlit-option-menu
 streamlit-plotly-events
+streamlit-extras
 DateTime
 plotly
 TIME-python
