@@ -12,17 +12,23 @@ div.st-emotion-cache-ms8dc9{
 div.block-container.st-emotion-cache-z5fcl4 {
     padding-left: 15px;
     padding-right: 15px;
-    padding-top: 15px;
+    padding-top: 50px;
 }
-div.ag-header-row.ag-header-row-column{
-    color: green;
-}
-div.st-emotion-cache-1viydde, div.st-emotion-cache-12735w0{
+div.st-emotion-cache-138t0cn.e1f1d6gn2{
     gap:5px;
     }
-div.container-xxl{
-margin:0;
-}
+    div.st-emotion-cache-1rsb481.e1f1d6gn2{
+        gap: 5px;
+    }
+    div.st-emotion-cache-13swq0i.e1f1d6gn2{
+        gap:5px;
+    }
+    div.container-xxl.d-flex.flex-column.flex-shrink-0.p-h.nav-justified{
+        margin: 0;
+    }
+    /* div.e1f1d6gn3{
+        align-content: end;
+    } */
 li.nav-item{
 flex-grow:0;
 white-space: nowrap;
