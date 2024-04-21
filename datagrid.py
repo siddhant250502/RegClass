@@ -133,8 +133,8 @@ def interactive_plot(df, x_axis, y_axis, ols, exchange):
                     
         fig.update_layout(title_text='Column Vs Column Scatter Plot')
         return fig
-    except:
-        st.warning('Please select the values')
+    except Exception as e:
+        st.error(e)
         
 def plot_columns(df, opt, sigma):
     mean = statistics.mean(df[opt])
@@ -202,8 +202,8 @@ def regre(df, indep_vars, dep_vars):
         rfr = RandomForestRegressor()
         try:
             rfr.fit(X_train, y_train)
-        except ValueError:
-            st.warning('Columns not proper')
+        except ValueError as e:
+            st.error(e)
         try:
             importances = rfr.feature_importances_
             forest_importances = pd.Series(importances, index=X.columns)
@@ -211,14 +211,14 @@ def regre(df, indep_vars, dep_vars):
             with st.container(border=True):
                 st.info("**Visualization of how each Independent variables Impact the Dependent variables**")
                 st.bar_chart(forest_importances, color='#30B9EF')
-        except:
-            pass
+        except Exception as e:
+            st.error(e)
         with open('model.pkl', 'wb') as f:
             pickle.dump(rfr, f)
         try:
             y_pred = rfr.predict(X_test)
-        except:
-            st.warning("Can't predict")
+        except Exception as e:
+            st.error(e)
         st.session_state.predicted = y_pred
         mse = mean_squared_error(y_test, y_pred)
         rmse = mse**0.5
@@ -245,8 +245,8 @@ def regre(df, indep_vars, dep_vars):
         
         try:
             rfc.fit(X_train, y_train)
-        except ValueError:
-            st.warning('Columns not proper')
+        except Exception as e:
+            st.error(e)
         try:
             importances = rfc.feature_importances_
             forest_importances = pd.Series(importances, index=X.columns)
@@ -254,14 +254,15 @@ def regre(df, indep_vars, dep_vars):
             with st.container(border=True):
                 st.info("**Visualization of how each Independent variables Impact the Dependent variables**")
                 st.bar_chart(forest_importances, color='#1168f5')
-        except:
-            pass
+        except Exception as e:
+            st.error(e)
         with open('model.pkl', 'wb') as f:
             pickle.dump(rfc, f)
         try:
             y_pred = rfc.predict(X_test)
-        except:
-            st.warning("Can't predict due to some error in the Dependant/Independant Variable")
+        except Exception as e:
+            # st.warning("Can't predict due to some error in the Dependant/Independant Variable")
+            st.error(e)
         st.session_state.predicted = y_pred
         progress_bar = st.progress(0)
         status_text = st.empty()
@@ -508,7 +509,9 @@ elif st.session_state.page == 1:
                     else:
                         st.session_state['histogram_df'] = st.session_state['data_header_df']
                         
-                elif option=='Plot':   
+                elif option=='Plot':  
+                    if st.session_state['histogram_df'] is None:
+                        st.session_state['histogram_df'] = st.session_state['data_header_df']
                     with stylable_container(
                         key='h3',
                         css_styles="""
@@ -530,10 +533,13 @@ elif st.session_state.page == 1:
                     fig = px.scatter(df, x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], trendline='ols') 
                     res = px.get_trendline_results(fig)
                     results = res.iloc[0]['px_fit_results']
+                    # st.write(dir(results))
                     r2 = results.rsquared
+                    ttest = results.tvalues
+                    ftest = results.f_pvalue
                     line = y_axis+'='+str(round(results.params[0],4)) +'+'+ str(round(results.params[1],4)) + x_axis
                     pval = str(round(results.pvalues[1],3))
-                    res_df = pd.DataFrame({"R-Squared":[r2], 'Line equation':[line], "P-Value":[pval]})
+                    res_df = pd.DataFrame({"R-Squared":[r2], 'Line equation':[line], "P-Value":[pval], "T-Test":[ttest], "f-test":[ftest]})
                     st.write('\n')
                     st.write('\n')
                     st.write('\n')
@@ -575,10 +581,14 @@ elif st.session_state.page == 1:
                         st.session_state['scatter_df'] = st.session_state['histogram_df']
                         
                 elif option=='Correlation Matrix':
+                    if st.session_state['scatter_df'] is None and st.session_state['histogram_df'] is not None:
+                        st.session_state['scatter_df'] = st.session_state['histogram_df']
+                    elif st.session_state['scatter_df'] is None and st.session_state['histogram_df'] is None:
+                        st.session_state['scatter_df'] = st.session_state['data_header_df']
                     try:
                         st.session_state['scatter_df']= st.session_state['scatter_df'].drop(['Exclude/Include'], axis=1)
-                    except:
-                        pass
+                    except Exception as e:
+                        st.error(e)
                     with stylable_container(
                         key='h3',
                         css_styles="""
@@ -691,8 +701,8 @@ elif st.session_state.page == 1:
 
                 except AttributeError:
                     st.warning('Please select your Independent and Dependent variables')
-                except KeyError:
-                    pass
+                except KeyError as e:
+                    st.error(e)
                 except ValueError:
                     st.warning('Please select your Independent and Dependent variables')
             else:
