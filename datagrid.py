@@ -582,7 +582,7 @@ elif st.session_state.page == 1:
                     try:
                         st.session_state['scatter_df']= st.session_state['scatter_df'].drop(['Exclude/Include'], axis=1)
                     except Exception as e:
-                        st.error(e)
+                        pass
                     with stylable_container(
                         key='h3',
                         css_styles="""
