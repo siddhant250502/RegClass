@@ -164,9 +164,7 @@ def plot_columns(df, opt, sigma):
     
 def correlation(df):
     fig = go.Figure()
-    vals = df.corr()
     fig.add_trace(go.Heatmap(z=df.corr(), x=df.columns, y=df.columns, colorscale='RdBu_r'))
-    fig.update_traces(text=vals, texttemplate="%{text}")
     return fig
     
 def check_mc(X):
