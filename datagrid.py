@@ -531,7 +531,7 @@ elif st.session_state.page == 1:
                     results = res.iloc[0]['px_fit_results']
                     # st.write(dir(results))
                     r2 = results.rsquared
-                    ttest = results.tvalues
+                    ttest = results.tvalues[0]
                     ftest = results.f_pvalue
                     line = y_axis+'='+str(round(results.params[0],4)) +'+'+ str(round(results.params[1],4)) + x_axis
                     pval = str(round(results.pvalues[1],3))
@@ -616,12 +616,13 @@ elif st.session_state.page == 1:
                             st.subheader('Filtered Dataset Preview')
                         st.dataframe(st.session_state['scatter_df'][cols], use_container_width=True, hide_index=True)
                         st.session_state['filter_df'] = st.session_state['scatter_df'][cols]
-                        
+            if st.session_state['filter_df'] is None:
+                st.session_state['filter_df'] = df
             
                         
         # elif option=='AI Model':
         with t2:
-            if st.session_state['filter_df'] is not None:
+            # if st.session_state['filter_df'] is not None:
                 if st.session_state['file_path'] is None:
                     st.session_state['file_path'] = st.session_state['filter_df']
                 st.title('AI Model Analysis')
