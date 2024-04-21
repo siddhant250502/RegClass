@@ -504,8 +504,6 @@ elif st.session_state.page == 1:
                             st.subheader('Filtered Dataset Preview')   
                         st.dataframe(new_df, use_container_width=True, hide_index=True)     
                         st.session_state['histogram_df'] = new_df
-                    else:
-                        st.session_state['histogram_df'] = st.session_state['data_header_df']
                         
                 elif option=='Plot':  
                     if st.session_state['histogram_df'] is None:
@@ -575,8 +573,6 @@ elif st.session_state.page == 1:
                         # st.session_state['filter_df']['Exclude/Include'][pntind] = True
                         st.dataframe(st.session_state['histogram_df'].iloc[pntind], use_container_width=True, hide_index=True)
                         st.session_state['scatter_df'] = st.session_state['histogram_df'].iloc[pntind]
-                    else:
-                        st.session_state['scatter_df'] = st.session_state['histogram_df']
                         
                 elif option=='Correlation Matrix':
                     if st.session_state['scatter_df'] is None and st.session_state['histogram_df'] is not None:
