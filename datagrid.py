@@ -5,6 +5,7 @@ from imblearn.pipeline import Pipeline
 import statistics
 import datetime
 import plotly.express as px
+from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix, r2_score
@@ -104,12 +105,12 @@ def r_square(df):
     dict_corr = {'Column 1': [], 'Column 2': [], 'R-Squared': []}#
     for i in range(len(df.columns)):
         for j in range(i+1, len(df.columns)):
-            fig = px.scatter(df, x=df.columns[i], y=df.columns[j], color_discrete_sequence=['#30B9EF'], trendline='ols') 
-            res = px.get_trendline_results(fig)
-            results = res.iloc[0]['px_fit_results'].rsquared
+            lr = LinearRegression()
+            lr.fit([[i] for i in df[df.columns[i]]], [[i] for i in df[df.columns[j]]])
             dict_corr['Column 1'].append(df.columns[i])
             dict_corr['Column 2'].append(df.columns[j])
-            dict_corr['R-Squared'].append(results)
+            # st.write(lr.score([df[df.columns[i]]], [df[df.columns[j]]]))
+            dict_corr['R-Squared'].append(lr.score([[i] for i in df[df.columns[i]]], [[i] for i in df[df.columns[j]]]))
     return(pd.DataFrame(dict_corr).sort_values(by = 'R-Squared', ascending=False))
     
 
