@@ -629,7 +629,7 @@ elif st.session_state.page == 1:
                             st.dataframe(st.session_state['corr_df'], hide_index=True, use_container_width=True)
                     with tab2:
                         table = r_square(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
-                        st.dataframe(table, use_container_width=True, hide_index=True)
+                        st.dataframe(table, width=600, hide_index=True)
                              
                 elif option=='Plot':  
                     prev_tab = st.session_state.prev_tab
