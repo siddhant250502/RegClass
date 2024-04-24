@@ -23,6 +23,7 @@ from streamlit_extras.stylable_container import stylable_container
 from imblearn.over_sampling import SMOTE
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+import kaleido
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 with open('style.css') as f:
@@ -675,7 +676,7 @@ elif st.session_state.page == 1:
                     ftest = results.f_pvalue
                     line = y_axis+' = '+ str(results.params[1]) + ' * ' + x_axis +' + '+ str(results.params[0])
                     pval = str(round(results.pvalues[1],3))
-                    res_df = pd.DataFrame.from_dict({"R-Squared":[r2], 'Line equation':[line], "P-Value":[pval], "T-Test":[ttest], "f-test":[ftest]})
+                    res_df = pd.DataFrame.from_dict({"R-Squared":[r2], 'Line equation':[line], "P-Value":[pval], "f-test":[ftest], "T-Test":[ttest] })
                     st.write('\n')
                     st.write('\n')
                     st.write('\n')
