@@ -109,6 +109,7 @@ def r_square(df):
             dict_corr['R-Squared'].append(r2_score(df[df.columns[i]], df[df.columns[j]]))
     return(pd.DataFrame(dict_corr).sort_values(by = 'R-Squared', ascending=False))
     
+
 def data_cleaning(data1):
     # Format columns
     for i in data1.columns:
@@ -137,27 +138,32 @@ def mice(df):
     df = pd.DataFrame(imputed_values, columns=df.columns)
     return df
     
-def interactive_plot(df, x_axis, y_axis, ols, exchange):
+def interactive_plot(df, x_axis, y_axis, exchange):
+    new_data = {True:'Include', False:'Exclude'}
+    df = df.replace({'Exclude/Include':new_data})
     try:
         if x_axis and y_axis:
             if not exchange:
-                if ols:
-                    fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_sequence=['#30B9EF', '#6082B6'], marginal_x='box', marginal_y='box', trendline='ols', trendline_color_override='red', height=450, custom_data=[x_axis, y_axis]) 
-                else:
-                    fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_sequence=['#30B9EF', '#6082B6'], marginal_x='box', marginal_y='box', height=450) 
+                # if ols:
+                #     fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', height=450, custom_data=[x_axis, y_axis]) 
+                # else:
+                fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', height=450) 
             else:
-                if ols:
-                    fig = px.scatter(df, x=x_axis, y=y_axis,color='Exclude/Include', color_discrete_sequence=['#30B9EF','#6082B6'], marginal_x='histogram', marginal_y='histogram', trendline='ols', trendline_color_override='red') 
-                else:
-                    fig = px.scatter(df, x=x_axis, y=y_axis,color='Exclude/Include', color_discrete_sequence=['#30B9EF','#6082B6'], marginal_x='histogram', marginal_y='histogram', height=450) 
+                # if ols:
+                #     fig = px.scatter(df, x=x_axis, y=y_axis,color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram') 
+                # else:
+                fig = px.scatter(df, x=x_axis, y=y_axis,color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram', height=450) 
         # fig.data[0]['hovertemplate'] = "X-axis: %{customdata[0]}<br>" + "Y-axis: %{customdata[1]}<br>"+ "<extra></extra>"
         # fig.update_traces(hovertemplate=None)
         # fig.update_layout(title_text='Column Vs Column Scatter Plot', hovermode="x unified")
+        fig.update_layout(legend_title_text='Data Points')
         return fig
     except Exception as e:
         st.error(e)
         
 def plot_columns(df, opt, sigma, est_sigma, curve):
+    new_data = {True:'Include', False:'Exclude'}
+    df = df.replace({'Exclude/Include':new_data})
     mean = statistics.mean(df[opt])
     if sigma:
         stddev = statistics.stdev(df[opt])
@@ -167,7 +173,8 @@ def plot_columns(df, opt, sigma, est_sigma, curve):
             cor.append((i-mean)**2)
         stddev = math.sqrt(sum(cor)/len(df[opt])-1)
     
-    fig = px.histogram(df, x=opt, color_discrete_sequence=['#6082B6','#30B9EF'], color='Exclude/Include')
+    fig = px.histogram(df, x=opt, color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, color='Exclude/Include')
+    fig.update_layout(legend_title_text='Data Points')
     fig.update_traces(xbins_size= (df[opt].max()-df[opt].min())/math.sqrt(len(df[opt]))) 
     fig0 = px.histogram(df, x=opt, color_discrete_sequence=['#30B9EF'], histnorm = 'probability density')
     f = fig0.full_figure_for_development(warn=False)
@@ -659,11 +666,11 @@ elif st.session_state.page == 1:
                     x_axis = st.selectbox('X-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-3)
                     y_axis = st.selectbox('Y-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-2)
                     c1, c2, c3 = st.columns(3)
+                    # with c1:
+                    #     ols = st.toggle('Regression line')
                     with c1:
-                        ols = st.toggle('Regression line')
-                    with c2:
                         exchange = st.toggle('Show distribution')
-                    with c3:
+                    with c2:
                         exclude = st.toggle('Exclude Selected points')
                     
                     # OLS Results
@@ -703,7 +710,7 @@ elif st.session_state.page == 1:
                     #         }
                     #     """
                     # ):    
-                    scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, ols, exchange)
+                    scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, exchange)
                     with stylable_container(
                         key='tab',
                         css_styles="""
