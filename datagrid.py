@@ -104,9 +104,12 @@ def r_square(df):
     dict_corr = {'Column 1': [], 'Column 2': [], 'R-Squared': []}#
     for i in range(len(df.columns)):
         for j in range(i+1, len(df.columns)):
+            fig = px.scatter(df, x=df.columns[i], y=df.columns[j], color_discrete_sequence=['#30B9EF'], trendline='ols') 
+            res = px.get_trendline_results(fig)
+            results = res.iloc[0]['px_fit_results'].rsquared
             dict_corr['Column 1'].append(df.columns[i])
             dict_corr['Column 2'].append(df.columns[j])
-            dict_corr['R-Squared'].append(r2_score(df[df.columns[i]], df[df.columns[j]]))
+            dict_corr['R-Squared'].append(results)
     return(pd.DataFrame(dict_corr).sort_values(by = 'R-Squared', ascending=False))
     
 
