@@ -520,7 +520,7 @@ elif st.session_state.page == 1:
                         """
                     ):
                         st.subheader('Column Distribution ')
-                    opt = st.selectbox('Select any Column', options=st.session_state['data_header_df'].columns)
+                    opt = st.selectbox('Select any Column', options=st.session_state['data_header_df'].columns[:-1])
                     c4, c10, c6 = st.columns(3)
                     with c4:
                         sigma = st.toggle('Real Stdev')
@@ -656,8 +656,8 @@ elif st.session_state.page == 1:
                         """
                     ):
                         st.subheader('Scatter Plot')
-                    x_axis = st.selectbox('X-axis', options=st.session_state['corr_df'].columns, index=len(st.session_state['corr_df'].columns)-3)
-                    y_axis = st.selectbox('Y-axis', options=st.session_state['corr_df'].columns, index=len(st.session_state['corr_df'].columns)-2)
+                    x_axis = st.selectbox('X-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-3)
+                    y_axis = st.selectbox('Y-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-2)
                     c1, c2, c3 = st.columns(3)
                     with c1:
                         ols = st.toggle('Regression line')
