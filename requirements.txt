@@ -5,6 +5,7 @@ streamlit-option-menu
 streamlit-plotly-events
 streamlit-extras
 imblearn
+kaleido
 DateTime
 plotly
 TIME-python
