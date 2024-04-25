@@ -521,7 +521,7 @@ elif st.session_state.page == 1:
                         else:
                             st.session_state['data_header_df'] = st.session_state['histogram_df']
                     elif prev_tab=='Plot':
-                        st.write(st.session_state['filter_df'])
+                        
                         if st.session_state['filter_df'] is not None:
                             st.session_state['data_header_df'] = st.session_state['filter_df']
                         else:
@@ -587,7 +587,7 @@ elif st.session_state.page == 1:
                         """
                         ):
                             st.subheader('Filtered Dataset Preview')   
-                        st.dataframe(new_df, use_container_width=True, hide_index=True)     
+                        st.dataframe(new_df[new_df['Exclude/Include']==True], use_container_width=True, hide_index=True)     
                         st.session_state['histogram_df'] = new_df
                    
                 elif option=='Correlation Matrix':
@@ -751,7 +751,7 @@ elif st.session_state.page == 1:
                     pntind = []
                     if scatter_chart_selected:
                         for i in range(len(scatter_chart_selected)):
-                            pntind.append(scatter_chart_selected[i]['pointIndex'])
+                            pntind.append(st.session_state['filter_df'][(st.session_state['filter_df'][x_axis] == scatter_chart_selected[i]['x']) & (st.session_state['filter_df'][y_axis] == scatter_chart_selected[i]['y'])].index)
                         if exclude:
                             st.session_state['exclude_df']['Exclude/Include'].iloc[pntind] = False
                             st.session_state['filter_df'] = pd.concat([st.session_state['exclude_df'][st.session_state['exclude_df']['Exclude/Include']==False], st.session_state['corr_df']])#[st.session_state['corr_df']['Exclude/Include']==True]
@@ -767,7 +767,7 @@ elif st.session_state.page == 1:
                         ):
                             st.subheader('Filtered Dataset Preview')
                         st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
-                        st.dataframe(st.session_state['filter_df'], use_container_width=True, hide_index=True)
+                        st.dataframe(st.session_state['filter_df'][st.session_state['filter_df']['Exclude/Include']==True], use_container_width=True, hide_index=True)
                         
                 
             # if st.session_state['filter_df'] is None:
