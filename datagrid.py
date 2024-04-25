@@ -142,30 +142,46 @@ def mice(df):
     df = pd.DataFrame(imputed_values, columns=df.columns)
     return df
     
-def interactive_plot(df, x_axis, y_axis, exchange):
+def interactive_plot(df, x_axis, y_axis, exchange, remove, ols):
     new_data = {True:'Include', False:'Exclude'}
     df = df.replace({'Exclude/Include':new_data})
     try:
         if x_axis and y_axis:
             if not exchange:
-                # if ols:
-                #     fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', height=450, custom_data=[x_axis, y_axis]) 
-                # else:
-                fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', height=450) 
+                if ols:
+                    if remove:
+                        df = df.loc[df['Exclude/Include']=='Include']
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', trendline='ols', trendline_color_override='#6082B6', height=450) 
+                    else:
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6','Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='box', marginal_y='box', trendline='ols', trendline_color_override='#6082B6', height=450) 
+                else:
+                    if remove:
+                        df = df.loc[df['Exclude/Include']=='Include']
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', height=450) 
+                    else:
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='box', marginal_y='box', height=450)  
             else:
-                # if ols:
-                #     fig = px.scatter(df, x=x_axis, y=y_axis,color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram') 
-                # else:
-                fig = px.scatter(df, x=x_axis, y=y_axis,color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram', height=450) 
+                if ols:
+                    if remove:
+                        df = df.loc[df['Exclude/Include']=='Include']
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram', trendline='ols', trendline_color_override='#6082B6', height=450) 
+                    else:
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='histogram', marginal_y='histogram', trendline='ols', trendline_color_override='#6082B6', height=450) 
+                else:
+                    if remove:
+                        df = df.loc[df['Exclude/Include']=='Include']
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram', height=450) 
+                    else:
+                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='histogram', marginal_y='histogram', height=450)  
+                
         # fig.data[0]['hovertemplate'] = "X-axis: %{customdata[0]}<br>" + "Y-axis: %{customdata[1]}<br>"+ "<extra></extra>"
         # fig.update_traces(hovertemplate=None)
-        # fig.update_layout(title_text='Column Vs Column Scatter Plot', hovermode="x unified")
-        fig.update_layout(legend_title_text='Data Points')
+        fig.update_layout(title_text='Column Vs Column Scatter Plot', legend_title_text='Data Points')
         return fig
     except Exception as e:
         st.error(e)
         
-def plot_columns(df, opt, sigma, est_sigma, curve):
+def plot_columns(df, opt, sigma, est_sigma, curve, remove):
     new_data = {True:'Include', False:'Exclude'}
     df = df.replace({'Exclude/Include':new_data})
     mean = statistics.mean(df[opt])
@@ -176,7 +192,8 @@ def plot_columns(df, opt, sigma, est_sigma, curve):
         for i in df[opt]:
             cor.append((i-mean)**2)
         stddev = math.sqrt(sum(cor)/len(df[opt])-1)
-    
+    if remove:
+        df = df[df['Exclude/Include']=='Include']
     fig = px.histogram(df, x=opt, color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, color='Exclude/Include')
     fig.update_layout(legend_title_text='Data Points')
     fig.update_traces(xbins_size= (df[opt].max()-df[opt].min())/math.sqrt(len(df[opt]))) 
@@ -532,15 +549,17 @@ elif st.session_state.page == 1:
                     ):
                         st.subheader('Column Distribution ')
                     opt = st.selectbox('Select any Column', options=st.session_state['data_header_df'].columns[:-1])
-                    c4, c10, c6 = st.columns(3)
+                    c4, c10, c6, c100 = st.columns(4)
                     with c4:
                         sigma = st.toggle('Real Stdev')
                     with c10:
                         est_sigma = st.toggle('Est. Stdev')
                     with c6:
                         curve = st.toggle('Curve')
+                    with c100:
+                        remove = st.toggle('Remove Excluded points')
                     if opt:
-                        bar_chart = plot_columns(st.session_state['data_header_df'], opt, sigma, est_sigma, curve)
+                        bar_chart = plot_columns(st.session_state['data_header_df'], opt, sigma, est_sigma, curve, remove)
 
                         bar_chart_selected = plotly_events(
                             bar_chart,
@@ -669,13 +688,15 @@ elif st.session_state.page == 1:
                         st.subheader('Scatter Plot')
                     x_axis = st.selectbox('X-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-3)
                     y_axis = st.selectbox('Y-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-2)
-                    c1, c2, c3 = st.columns(3)
-                    # with c1:
-                    #     ols = st.toggle('Regression line')
+                    c1, c2, c3, c4 = st.columns(4)
                     with c1:
-                        exchange = st.toggle('Show distribution')
+                        ols = st.toggle('Regression line')
                     with c2:
+                        exchange = st.toggle('Show distribution')
+                    with c3:
                         exclude = st.toggle('Exclude Selected points')
+                    with c4:
+                        remove = st.toggle('Remove Excluded points')
                     
                     # OLS Results
                     # df.drop(['Exluce/Include'], axis=1, inplace=True)
@@ -714,7 +735,7 @@ elif st.session_state.page == 1:
                     #         }
                     #     """
                     # ):    
-                    scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, exchange)
+                    scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, exchange, remove, ols)
                     with stylable_container(
                         key='tab',
                         css_styles="""
