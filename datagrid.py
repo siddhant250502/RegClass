@@ -142,40 +142,24 @@ def mice(df):
     df = pd.DataFrame(imputed_values, columns=df.columns)
     return df
     
-def interactive_plot(df, x_axis, y_axis, exchange, remove, ols):
+def interactive_plot(df, x_axis, y_axis, exchange, ols):
     new_data = {True:'Include', False:'Exclude'}
     df = df.replace({'Exclude/Include':new_data})
     try:
         if x_axis and y_axis:
             if not exchange:
                 if ols:
-                    if remove:
-                        df = df.loc[df['Exclude/Include']=='Include']
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', trendline='ols', trendline_color_override='#6082B6', height=450) 
-                    else:
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6','Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='box', marginal_y='box', trendline='ols', trendline_color_override='#6082B6', height=450) 
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6','Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='box', marginal_y='box', trendline='ols', trendline_color_override='#D22B2B', height=450) 
                 else:
-                    if remove:
-                        df = df.loc[df['Exclude/Include']=='Include']
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='box', marginal_y='box', height=450) 
-                    else:
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='box', marginal_y='box', height=450)  
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='box', marginal_y='box', height=450)  
             else:
                 if ols:
-                    if remove:
-                        df = df.loc[df['Exclude/Include']=='Include']
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram', trendline='ols', trendline_color_override='#6082B6', height=450) 
-                    else:
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='histogram', marginal_y='histogram', trendline='ols', trendline_color_override='#6082B6', height=450) 
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='histogram', marginal_y='histogram', trendline='ols', trendline_color_override='#D22B2B', height=450) 
                 else:
-                    if remove:
-                        df = df.loc[df['Exclude/Include']=='Include']
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={ 'Include':'#30B9EF'}, marginal_x='histogram', marginal_y='histogram', height=450) 
-                    else:
-                        fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='histogram', marginal_y='histogram', height=450)  
+                    fig = px.scatter(df, x=x_axis, y=y_axis, color='Exclude/Include', color_discrete_map={'Exclude':'#6082B6', 'Include':'#30B9EF'}, symbol='Exclude/Include', symbol_map={'Exclude':'x', 'Include':'circle-open'}, marginal_x='histogram', marginal_y='histogram', height=450)  
                 
-        # fig.data[0]['hovertemplate'] = "X-axis: %{customdata[0]}<br>" + "Y-axis: %{customdata[1]}<br>"+ "<extra></extra>"
-        # fig.update_traces(hovertemplate=None)
+        fig.data[0]['hovertemplate'] = "X-axis: %{customdata[0]}<br>" + "Y-axis: %{customdata[1]}<br>"+ "<extra></extra>"
+        fig.update_traces(hovertemplate=None)
         fig.update_layout(title_text='Column Vs Column Scatter Plot', legend_title_text='Data Points')
         return fig
     except Exception as e:
@@ -695,8 +679,8 @@ elif st.session_state.page == 1:
                         exchange = st.toggle('Show distribution')
                     with c3:
                         exclude = st.toggle('Exclude Selected points')
-                    with c4:
-                        remove = st.toggle('Remove Excluded points')
+                    # with c4:
+                    #     remove = st.toggle('Remove Excluded points')
                     
                     # OLS Results
                     # df.drop(['Exluce/Include'], axis=1, inplace=True)
@@ -735,7 +719,7 @@ elif st.session_state.page == 1:
                     #         }
                     #     """
                     # ):    
-                    scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, exchange, remove, ols)
+                    scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, exchange, ols)
                     with stylable_container(
                         key='tab',
                         css_styles="""
@@ -751,7 +735,7 @@ elif st.session_state.page == 1:
                     pntind = []
                     if scatter_chart_selected:
                         for i in range(len(scatter_chart_selected)):
-                            pntind.append(st.session_state['filter_df'][(st.session_state['filter_df'][x_axis] == scatter_chart_selected[i]['x']) & (st.session_state['filter_df'][y_axis] == scatter_chart_selected[i]['y'])].index)
+                            pntind.append(st.session_state['corr_df'][(st.session_state['corr_df'][x_axis] == scatter_chart_selected[i]['x']) & (st.session_state['corr_df'][y_axis] == scatter_chart_selected[i]['y'])].index)
                         if exclude:
                             st.session_state['exclude_df']['Exclude/Include'].iloc[pntind] = False
                             st.session_state['filter_df'] = pd.concat([st.session_state['exclude_df'][st.session_state['exclude_df']['Exclude/Include']==False], st.session_state['corr_df']])#[st.session_state['corr_df']['Exclude/Include']==True]
