@@ -863,15 +863,31 @@ elif st.session_state.page == 1:
                             st.write('\n')
                             st.plotly_chart(fig)
                     
-                
-            # if st.session_state['filter_df'] is None:
-            #     st.session_state['filter_df'] = df
             
                         
-        # elif option=='AI Model':
         with t2:
-            if st.session_state['filter_df'] is not None and st.session_state['file_path'] is None:
-                st.session_state['file_path'] = st.session_state['filter_df']
+            if st.session_state['filter_df'] is None :
+                if st.session_state['prev_tab']=='Data Header':
+                    if st.session_state['data_header_df'] is None:
+                        st.session_state['filter_df'] = df
+                    else:
+                        st.session_state['filter_df'] = st.session_state['data_header_df']
+                        
+                elif st.session_state['prev_tab'] == 'Data Statistics':
+                    if st.session_state['histogram_df'] is None:
+                        st.session_state['filter_df'] = st.session_state['data_header_df']
+                    else:
+                        st.session_state['filter_df'] = st.session_state['histogram_df']
+                        
+                elif st.session_state['prev_tab']=='Corelation Matrix':
+                    if st.session_state['corr_df'] is None:
+                        st.session_state['filter_df'] = st.session_state['histogram_df']
+                    else:
+                        st.session_state['filter_df'] = st.session_state['corr_df']
+                        
+                elif st.session_state['prev_tab']=='Plot':
+                        st.session_state['filter_df'] = st.session_state['corr_df']
+                    
             st.title('AI Model Analysis')
             col4, col5, c6  = st.columns([1,1,0.2])
             col9, col10, col11, col12 = st.columns([0.4, 0.4, 0.3, 0.7])
@@ -901,14 +917,13 @@ elif st.session_state.page == 1:
                 if len(dep_vars) == 0:
                     st.warning('Choose Dependent variable')
             
-        # elif option=='Predictor':
         with t3:
             if st.session_state.reg:
                 try:
                     with st.container(border=True):
                         slider_val = []
                         for i in st.session_state.indep_vars:
-                            slider_val.append(st.slider(i, float(df[i].min()), float(df[i].max()), float(df[i].mean())))
+                            slider_val.append(st.slider(i, float(st.session_state['filter_df'][i].min()), float(st.session_state['filter_df'][i].max()), float(st.session_state['filter_df'][i].mean())))
                     
                     model = pickle.load(open('model.pkl', 'rb'))
                     pred = model.predict([slider_val])
@@ -917,8 +932,8 @@ elif st.session_state.page == 1:
                     colors = []
                     pred_dict = {}
                     val = pred
-                    min = float(df[st.session_state.dep_vars].min())
-                    maxim = float(df[st.session_state.dep_vars].max())
+                    min = float(st.session_state['filter_df'][st.session_state.dep_vars].min())
+                    maxim = float(st.session_state['filter_df'][st.session_state.dep_vars].max())
                     steps = (min+maxim)/100
                     for i in range(num_steps):
                         red = 255.0 if i < num_steps / 2 else 1.0 - (2.0 * (i - num_steps / 2) / num_steps)
@@ -939,7 +954,7 @@ elif st.session_state.page == 1:
                     with st.container(border=True):
                         st.write('Predicted Value')
                         st.pyplot(plt, use_container_width=True)
-                        st.slider('', float(df[st.session_state.dep_vars].min()), float(df[st.session_state.dep_vars].max()), float(pred[0]), disabled=True)
+                        st.slider('', float(st.session_state['filter_df'][st.session_state.dep_vars].min()), float(st.session_state['filter_df'][st.session_state.dep_vars].max()), float(pred[0]), disabled=True)
                         st.info(f'Predicted value is {float(pred[0])}')
                     
 
