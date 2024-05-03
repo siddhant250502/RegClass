@@ -26,6 +26,7 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import kaleido
 
+
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
 with open('style.css') as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -814,6 +815,7 @@ elif st.session_state.page == 1:
                             if EXCLUDE:
                                 st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE'].iloc[pntind] = False
                                 st.session_state['filter_df'] = pd.concat([st.session_state['EXCLUDE_df'][st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE']==False], st.session_state['corr_df']])#[st.session_state['corr_df']['EXCLUDE/INCLUDE']==True]
+                                st.rerun()
                             else:
                                 st.session_state['filter_df'] = st.session_state['corr_df'].iloc[pntind]
                             with stylable_container(
@@ -826,7 +828,7 @@ elif st.session_state.page == 1:
                             ):
                                 st.subheader('Filtered Dataset Preview')
                             st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
-                            st.rerun()
+                            
                         # st.dataframe(st.session_state['filter_df'], use_container_width=True, hide_index=True)#[st.session_state['filter_df']['EXCLUDE/INCLUDE']==True]
                         with t22:
                             c1,c2,c3,c4,c5 = st.columns(5)
