@@ -818,15 +818,15 @@ elif st.session_state.page == 1:
                                 st.rerun()
                             else:
                                 st.session_state['filter_df'] = st.session_state['corr_df'].iloc[pntind]
-                            with stylable_container(
-                            key='h3',
-                            css_styles="""
-                                h3 {
-                                    font-size: 16px;
-                                }
-                            """
-                            ):
-                                st.subheader('Filtered Dataset Preview')
+                            # with stylable_container(
+                            # key='h3',
+                            # css_styles="""
+                            #     h3 {
+                            #         font-size: 16px;
+                            #     }
+                            # """
+                            # ):
+                            #     st.subheader('Filtered Dataset Preview')
                             st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
                             
                         # st.dataframe(st.session_state['filter_df'], use_container_width=True, hide_index=True)#[st.session_state['filter_df']['EXCLUDE/INCLUDE']==True]
