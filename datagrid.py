@@ -638,28 +638,44 @@ elif st.session_state.page == 1:
                         st.error("You haven't saved the data in Data Header")
                    
                 elif option=='Correlation Matrix':
-                    # prev_tab = st.session_state.prev_tab
-                    # st.session_state.prev_tab = option
-                    # # st.write(prev_tab)
+                    prev_tab = st.session_state.prev_tab
+                    st.session_state.prev_tab = option
+                    # st.write(prev_tab)
                     tab1, tab2 = st.tabs(['Heatmap', 'Table'])
-                    # if prev_tab=='Data Header':
-                    #     if st.session_state['data_header_df'] is not None:
-                    #         st.session_state['histogram_df'] = st.session_state['data_header_df']
-                    #     else:
-                    #         st.session_state['data_header_df'] = pd.read_csv(st.session_state['file_path'])
-                    #         st.session_state['data_header_df'].columns = [i.upper() for i in st.session_state['data_header_df'].columns]
-                    #         st.session_state['data_header_df'] = data_cleaning(st.session_state['data_header_df'])
-                    #         st.session_state['data_header_df']['EXCLUDE/INCLUDE'] = True
-                    # elif prev_tab=='Data Statistics':
-                    #     if st.session_state['histogram_df'] is not None:
-                    #         st.session_state['histogram_df'] = st.session_state['histogram_df']
-                    #     else:
-                    #         st.session_state['histogram_df'] = st.session_state['data_header_df']
-                    # elif prev_tab=='Plot':
-                    #     if st.session_state['filter_df'] is not None:
-                    #         st.session_state['histogram_df'] = st.session_state['filter_df']
-                    #     else:
-                    #         st.session_state['histogram_df'] = st.session_state['corr_df']
+                    if prev_tab=='Data Header':
+                        if st.session_state['data_header_df'] is not None:
+                            # st.session_state['histogram_df'] = st.session_state['data_header_df']
+                            heatmap = correlation(st.session_state['data_header_df'][st.session_state['data_header_df'].columns[:-1]])
+                            st.session_state['corr_df'] = st.session_state['data_header_df']
+                        else:
+                            st.session_state['data_header_df'] = pd.read_csv(st.session_state['file_path'])
+                            st.session_state['data_header_df'].columns = [i.upper() for i in st.session_state['data_header_df'].columns]
+                            st.session_state['data_header_df'] = data_cleaning(st.session_state['data_header_df'])
+                            st.session_state['data_header_df']['EXCLUDE/INCLUDE'] = True
+                            heatmap = correlation(st.session_state['data_header_df'][st.session_state['data_header_df'].columns[:-1]])
+                            st.session_state['corr_df'] = st.session_state['data_header_df']
+                    elif prev_tab=='Data Statistics':
+                        if st.session_state['histogram_df'] is not None:
+                            # st.session_state['histogram_df'] = st.session_state['histogram_df']
+                            heatmap = correlation(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
+                            st.session_state['corr_df'] = st.session_state['histogram_df']
+                        else:
+                            # st.session_state['histogram_df'] = st.session_state['data_header_df']
+                            if st.session_state['data_header_df'] is not None:
+                                heatmap = correlation(st.session_state['data_header_df'][st.session_state['data_header_df'].columns[:-1]])
+                                st.session_state['corr_df'] = st.session_state['data_header_df']
+                            elif st.session_state['filter_df'] is not None:
+                                heatmap = correlation(st.session_state['filter_df'][st.session_state['filter_df'].columns[:-1]])
+                                st.session_state['corr_df'] = st.session_state['filter_df']
+                    elif prev_tab=='Plot':
+                        if st.session_state['filter_df'] is not None:
+                            # st.session_state['histogram_df'] = st.session_state['filter_df']
+                            heatmap = correlation(st.session_state['filter_df'][st.session_state['filter_df'].columns[:-1]])
+                            st.session_state['corr_df'] = st.session_state['filter_df']
+                        else:
+                            # st.session_state['histogram_df'] = st.session_state['corr_df']
+                            heatmap = correlation(st.session_state['corr_df'][st.session_state['corr_df'].columns[:-1]])
+                            st.session_state['corr_df'] = st.session_state['corr_df']
                     
                     # if st.session_state['histogram_df'] is None:
                     #     st.session_state['histogram_df'] = st.session_state['data_header_df']
@@ -673,7 +689,7 @@ elif st.session_state.page == 1:
                             """
                         ):
                             st.subheader('Correlation Matrix Heatmap')
-                        heatmap = correlation(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
+                        # heatmap = correlation(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
                         config = {'displayModeBar':False}
                         # heatmap_selected = plotly_events(
                         #     heatmap,
