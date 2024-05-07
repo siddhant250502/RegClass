@@ -841,8 +841,8 @@ elif st.session_state.page == 1:
                         #     st.subheader('Filtered Dataset Preview')
                         # st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
                         
-                    st.dataframe(st.session_state['filter_df'], use_container_width=True)#[st.session_state['filter_df']['EXCLUDE/INCLUDE']==True]
-                    st.write(len(st.session_state['filter_df']))
+                    # st.dataframe(st.session_state['filter_df'], use_container_width=True)#[st.session_state['filter_df']['EXCLUDE/INCLUDE']==True]
+                    # st.write(len(st.session_state['filter_df']))
         
                         
         with t2:
