@@ -143,23 +143,16 @@ def mice(df):
     df = pd.DataFrame(imputed_values, columns=df.columns)
     return df
     
-def interactive_plot(df, x_axis, y_axis, exchange, ols):
+def interactive_plot(df, x_axis, y_axis, ols):
     new_data = {True:'INCLUDE', False:'EXCLUDE'}
     df = df.replace({'EXCLUDE/INCLUDE':new_data})
     try:
         if x_axis and y_axis:
-            if not exchange:
-                if ols:
-                    fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B','INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, marginal_x='box', marginal_y='box', trendline='ols', trendline_color_override='#000000', height=450, custom_data=[x_axis, y_axis]) 
-                    fig.update_traces(hovertemplate=None)
-                else:
-                    fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B', 'INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, marginal_x='box', marginal_y='box', height=450, custom_data=[df[x_axis], df[y_axis]])    
+            if ols:
+                fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B','INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, trendline='ols', trendline_color_override='#000000', height=450, custom_data=[x_axis, y_axis]) 
+                fig.update_traces(hovertemplate=None)
             else:
-                if ols:
-                    fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B', 'INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, marginal_x='histogram', marginal_y='histogram', trendline='ols', trendline_color_override='#000000', height=450, custom_data=[df[x_axis], df[y_axis]]) 
-                    fig.update_traces(hovertemplate=None)
-                else:
-                    fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B', 'INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, marginal_x='histogram', marginal_y='histogram', height=450, custom_data=[df[x_axis], df[y_axis]])  
+                fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B', 'INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, height=450, custom_data=[df[x_axis], df[y_axis]])    
         fig.update_layout(title_text='Column Vs Column Scatter Plot', legend_title_text='Data Points')
         return fig
     except Exception as e:
@@ -645,31 +638,31 @@ elif st.session_state.page == 1:
                         st.error("You haven't saved the data in Data Header")
                    
                 elif option=='Correlation Matrix':
-                    prev_tab = st.session_state.prev_tab
-                    st.session_state.prev_tab = option
-                    # st.write(prev_tab)
+                    # prev_tab = st.session_state.prev_tab
+                    # st.session_state.prev_tab = option
+                    # # st.write(prev_tab)
                     tab1, tab2 = st.tabs(['Heatmap', 'Table'])
-                    if prev_tab=='Data Header':
-                        if st.session_state['data_header_df'] is not None:
-                            st.session_state['histogram_df'] = st.session_state['data_header_df']
-                        else:
-                            st.session_state['data_header_df'] = pd.read_csv(st.session_state['file_path'])
-                            st.session_state['data_header_df'].columns = [i.upper() for i in st.session_state['data_header_df'].columns]
-                            st.session_state['data_header_df'] = data_cleaning(st.session_state['data_header_df'])
-                            st.session_state['data_header_df']['EXCLUDE/INCLUDE'] = True
-                    elif prev_tab=='Data Statistics':
-                        if st.session_state['histogram_df'] is not None:
-                            st.session_state['histogram_df'] = st.session_state['histogram_df']
-                        else:
-                            st.session_state['histogram_df'] = st.session_state['data_header_df']
-                    elif prev_tab=='Plot':
-                        if st.session_state['filter_df'] is not None:
-                            st.session_state['histogram_df'] = st.session_state['filter_df']
-                        else:
-                            st.session_state['histogram_df'] = st.session_state['corr_df']
+                    # if prev_tab=='Data Header':
+                    #     if st.session_state['data_header_df'] is not None:
+                    #         st.session_state['histogram_df'] = st.session_state['data_header_df']
+                    #     else:
+                    #         st.session_state['data_header_df'] = pd.read_csv(st.session_state['file_path'])
+                    #         st.session_state['data_header_df'].columns = [i.upper() for i in st.session_state['data_header_df'].columns]
+                    #         st.session_state['data_header_df'] = data_cleaning(st.session_state['data_header_df'])
+                    #         st.session_state['data_header_df']['EXCLUDE/INCLUDE'] = True
+                    # elif prev_tab=='Data Statistics':
+                    #     if st.session_state['histogram_df'] is not None:
+                    #         st.session_state['histogram_df'] = st.session_state['histogram_df']
+                    #     else:
+                    #         st.session_state['histogram_df'] = st.session_state['data_header_df']
+                    # elif prev_tab=='Plot':
+                    #     if st.session_state['filter_df'] is not None:
+                    #         st.session_state['histogram_df'] = st.session_state['filter_df']
+                    #     else:
+                    #         st.session_state['histogram_df'] = st.session_state['corr_df']
                     
-                    if st.session_state['histogram_df'] is None:
-                        st.session_state['histogram_df'] = st.session_state['data_header_df']
+                    # if st.session_state['histogram_df'] is None:
+                    #     st.session_state['histogram_df'] = st.session_state['data_header_df']
                     with tab1:
                         with stylable_container(
                             key='h3',
@@ -681,33 +674,35 @@ elif st.session_state.page == 1:
                         ):
                             st.subheader('Correlation Matrix Heatmap')
                         heatmap = correlation(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
-                        heatmap_selected = plotly_events(
-                            heatmap,
-                            click_event=True
-                        )
+                        config = {'displayModeBar':False}
+                        # heatmap_selected = plotly_events(
+                        #     heatmap,
+                        #     click_event=True
+                        # )
+                        st.plotly_chart(heatmap, use_container_width=True, config=config)
                         
-                        if heatmap_selected:
-                            st.session_state['col_name'].add(heatmap_selected[0]['x'])
-                            st.session_state['col_name'].add(heatmap_selected[0]['y'])
-                        cols = list(st.session_state['col_name'])
-                        if len(st.session_state['col_name'])!= 0:
-                            st.write("Columns selected:")
-                            st.text(st.session_state['col_name'])
-                        if st.button('Preview'):
-                            with stylable_container(
-                            key='h3',
-                            css_styles="""
-                                h3 {
-                                    font-size: 16px;
-                                }
-                            """
-                            ):
-                                st.subheader('Filtered Dataset Preview')
-                            st.session_state['corr_df'] = st.session_state['histogram_df'][cols]
-                            st.dataframe(st.session_state['corr_df'], hide_index=True, use_container_width=True)
-                    with tab2:
-                        table = r_square(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
-                        st.dataframe(table, width=600, hide_index=True)
+                    #     if heatmap_selected:
+                    #         st.session_state['col_name'].add(heatmap_selected[0]['x'])
+                    #         st.session_state['col_name'].add(heatmap_selected[0]['y'])
+                    #     cols = list(st.session_state['col_name'])
+                    #     if len(st.session_state['col_name'])!= 0:
+                    #         st.write("Columns selected:")
+                    #         st.text(st.session_state['col_name'])
+                    #     if st.button('Preview'):
+                    #         with stylable_container(
+                    #         key='h3',
+                    #         css_styles="""
+                    #             h3 {
+                    #                 font-size: 16px;
+                    #             }
+                    #         """
+                    #         ):
+                    #             st.subheader('Filtered Dataset Preview')
+                    #         st.session_state['corr_df'] = st.session_state['histogram_df'][cols]
+                    #         st.dataframe(st.session_state['corr_df'], hide_index=True, use_container_width=True)
+                    # with tab2:
+                    #     table = r_square(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
+                    #     st.dataframe(table, width=600, hide_index=True)
                              
                 elif option=='Plot':  
                     prev_tab = st.session_state.prev_tab
@@ -737,134 +732,100 @@ elif st.session_state.page == 1:
                     elif st.session_state['corr_df'] is None and st.session_state['histogram_df'] is None:
                         st.session_state['corr_df'] = st.session_state['data_header_df']
                     st.session_state['EXCLUDE_df'] = st.session_state['corr_df']
-                    t11, t22 = st.tabs(['2D','3D'])
-                    with t11:
-                        with stylable_container(
-                            key='h3',
-                            css_styles="""
-                                h3 {
-                                    font-size: 16px;
-                                }
-                            """
-                        ):
-                            st.subheader('Scatter Plot')
-                        x_axis = st.selectbox('X-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-3)
-                        y_axis = st.selectbox('Y-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-2)
-                        c1, c2, c3, c4 = st.columns(4)
-                        with c1:
-                            ols = st.toggle('Regression line')
-                        with c2:
-                            exchange = st.toggle('Show distribution')
-                        with c3:
-                            EXCLUDE = st.toggle('EXCLUDE Selected points')
-                        
-                        # OLS Results
-                        # df.drop(['Exluce/INCLUDE'], axis=1, inplace=True)
-                        fig = px.scatter(st.session_state['corr_df'], x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], trendline='ols') 
-                        res = px.get_trendline_results(fig)
-                        results = res.iloc[0]['px_fit_results']
-                        r2 = results.rsquared
-                        ttest = results.tvalues[0]
-                        ftest = results.f_pvalue
-                        line = y_axis+' = '+ str(results.params[1]) + ' * ' + x_axis +' + '+ str(results.params[0])
-                        pval = str(round(results.pvalues[1],3))
-                        res_df = pd.DataFrame.from_dict({"R-Squared":[r2], 'Line equation':[line], "P-Value":[pval], "f-test":[ftest], "T-Test":[ttest] })
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
-                        with stylable_container(
-                            key='h3',
-                            css_styles="""
-                                h3 {
-                                    font-size: 16px;
-                                }
-                            """
-                        ):
-                            st.subheader('OLS Results')
-                        st.dataframe(res_df, hide_index=True, use_container_width=True)
-                        # with stylable_container(
-                        #     key='tab',
-                        #     css_styles="""
-                        #         table {
-                        #             border: None !important;
-                        #             margin-top:20px;
-                        #             width:1400px;
-                        #         }
-                        #     """
-                        # ):    
-                        scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, exchange, ols)
-                        with stylable_container(
-                            key='tab',
-                            css_styles="""
-                                {
-                                    margin-top:30px;   
-                                }
-                            """
-                        ):
-                            scatter_chart_selected = plotly_events(
-                                scatter_chart,
-                                select_event=True,
-                            )
-                        pntind = []
-                        if scatter_chart_selected:
-                            for i in range(len(scatter_chart_selected)):
-                                pntind.append(st.session_state['corr_df'][(st.session_state['corr_df'][x_axis] == scatter_chart_selected[i]['x']) & (st.session_state['corr_df'][y_axis] == scatter_chart_selected[i]['y'])].index[0])
-                            if EXCLUDE:
-                                st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE'].iloc[pntind] = False
-                                st.session_state['filter_df'] = pd.concat([st.session_state['EXCLUDE_df'][st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE']==False], st.session_state['corr_df']])#[st.session_state['corr_df']['EXCLUDE/INCLUDE']==True]
-                                st.rerun()
-                            else:
-                                st.session_state['filter_df'] = st.session_state['corr_df'].iloc[pntind]
-                            # with stylable_container(
-                            # key='h3',
-                            # css_styles="""
-                            #     h3 {
-                            #         font-size: 16px;
-                            #     }
-                            # """
-                            # ):
-                            #     st.subheader('Filtered Dataset Preview')
-                            st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
-                            
-                        # st.dataframe(st.session_state['filter_df'], use_container_width=True, hide_index=True)#[st.session_state['filter_df']['EXCLUDE/INCLUDE']==True]
-                        with t22:
-                            c1,c2,c3,c4,c5 = st.columns(5)
-                            with c1:
-                                xa = st.selectbox('X-axis', options=st.session_state['corr_df'].columns[:-1])
-                                light_dark = st.toggle('Light Mode')
-                            with c2:
-                                ya = st.selectbox('Y-axis', options=st.session_state['corr_df'].columns[:-1])
-                                
-                            with c3:
-                                za = st.selectbox('Z-axis', options=st.session_state['corr_df'].columns[:-1])
-                            with c4:
-                                cat = st.selectbox('Category', options=st.session_state['corr_df'].columns, index=None)
-                            with c5:
-                                msize = st.number_input('Marker size', 1, 10, value=3, step=1)
-                            # if st.button('Plot'):  
-                            if cat:
-                                if light_dark:
-                                    fig = px.scatter_3d(st.session_state['corr_df'], x=xa, y=ya, z=za,color=cat, height=500, width=1200, color_continuous_scale='Picnic')
-                                else:
-                                    fig = px.scatter_3d(st.session_state['corr_df'], x=xa, y=ya, z=za,color=cat, height=500, width=1200, template='plotly_dark', color_continuous_scale='Picnic')
-                            else:
-                                if light_dark:
-                                    fig = px.scatter_3d(st.session_state['corr_df'], x=xa, y=ya, z=za, height=500, width=1200, color_continuous_scale='Picnic')
-                                else:
-                                    fig = px.scatter_3d(st.session_state['corr_df'], x=xa, y=ya, z=za, height=500, template='plotly_dark', width=1200, color_continuous_scale='Picnic')
-                            fig.update_traces(marker=dict(size=msize))
-                            st.write('\n')
-                            st.write('\n')
-                            st.write('\n')
-                            st.write('\n')
-                            st.write('\n')
-                            st.write('\n')
-                            st.plotly_chart(fig)
+                    # t11, t22 = st.tabs(['2D','3D'])
+                
+                    with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                        st.subheader('Scatter Plot')
+                    x_axis = st.selectbox('X-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-3)
+                    y_axis = st.selectbox('Y-axis', options=st.session_state['corr_df'].columns[:-1], index=len(st.session_state['corr_df'].columns)-2)
+                    c1, c2, c3, c4 = st.columns(4)
+                    with c1:
+                        ols = st.toggle('Regression line')
+                    # with c2:
+                    #     exchange = st.toggle('Show distribution')
+                    with c3:
+                        EXCLUDE = st.toggle('EXCLUDE Selected points')
                     
-            
+                    # OLS Results
+                    # df.drop(['Exluce/INCLUDE'], axis=1, inplace=True)
+                    fig = px.scatter(st.session_state['corr_df'], x=x_axis, y=y_axis, color_discrete_sequence=['#30B9EF'], trendline='ols') 
+                    res = px.get_trendline_results(fig)
+                    results = res.iloc[0]['px_fit_results']
+                    r2 = results.rsquared
+                    ttest = results.tvalues[0]
+                    ftest = results.f_pvalue
+                    line = y_axis+' = '+ str(results.params[1]) + ' * ' + x_axis +' + '+ str(results.params[0])
+                    pval = str(round(results.pvalues[1],3))
+                    res_df = pd.DataFrame.from_dict({"R-Squared":[r2], 'Line equation':[line], "P-Value":[pval], "f-test":[ftest], "T-Test":[ttest] })
+                    st.write('\n')
+                    st.write('\n')
+                    st.write('\n')
+                    st.write('\n')
+                    st.write('\n')
+                    st.write('\n')
+                    with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                        st.subheader('OLS Results')
+                    st.dataframe(res_df, hide_index=True, use_container_width=True)
+                    # with stylable_container(
+                    #     key='tab',
+                    #     css_styles="""
+                    #         table {
+                    #             border: None !important;
+                    #             margin-top:20px;
+                    #             width:1400px;
+                    #         }
+                    #     """
+                    # ):    
+                    scatter_chart = interactive_plot(st.session_state['corr_df'], x_axis, y_axis, ols)
+                    with stylable_container(
+                        key='tab',
+                        css_styles="""
+                            {
+                                margin-top:30px;   
+                            }
+                        """
+                    ):
+                        scatter_chart_selected = plotly_events(
+                            scatter_chart,
+                            select_event=True,
+                        )
+                    pntind = []
+                    if scatter_chart_selected:
+                        for i in range(len(scatter_chart_selected)):
+                            pntind.append(st.session_state['corr_df'][(st.session_state['corr_df'][x_axis] == scatter_chart_selected[i]['x']) & (st.session_state['corr_df'][y_axis] == scatter_chart_selected[i]['y'])].index[0])
+                        if EXCLUDE:
+                            st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE'].iloc[pntind] = False
+                            st.session_state['filter_df'] = pd.concat([st.session_state['EXCLUDE_df'][st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE']==False], st.session_state['corr_df']])#[st.session_state['corr_df']['EXCLUDE/INCLUDE']==True]
+                            st.rerun()
+                        else:
+                            st.session_state['filter_df'] = st.session_state['corr_df'].iloc[pntind]
+                        # with stylable_container(
+                        # key='h3',
+                        # css_styles="""
+                        #     h3 {
+                        #         font-size: 16px;
+                        #     }
+                        # """
+                        # ):
+                        #     st.subheader('Filtered Dataset Preview')
+                        st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
+                        
+                    # st.dataframe(st.session_state['filter_df'], use_container_width=True, hide_index=True)#[st.session_state['filter_df']['EXCLUDE/INCLUDE']==True]
+        
                         
         with t2:
             if st.session_state['filter_df'] is None :
