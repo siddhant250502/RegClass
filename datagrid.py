@@ -468,7 +468,7 @@ elif st.session_state.page == 1:
            
         col1, col2, col3 = st.columns(3)
  
-        t1, t2, t3 = st.tabs(['Dataset Info', 'AI Model', 'Predictor'])
+        t1, t2, t3, t4 = st.tabs(['Dataset Info','Decision Tree', 'AI Model', 'Predictor'])
                   
         # Update content based on button click
         # if option=='Dataset Info':
@@ -531,8 +531,40 @@ elif st.session_state.page == 1:
                     if select:
                         df['EXCLUDE/INCLUDE'] = True
                     if deselect:
-                        df['EXCLUDE/INCLUDE'] = False
+                        df['EXCLUDE/INCLUDE'] = False 
                     try:
+                        st.write('\n')
+                        st.write('\n')
+                        st.write('\n')
+                        st.write('\n')
+                        st.write('\n')
+                        st.write('\n')
+                        with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                        ):
+                          st.subheader('Column Selection')
+                        res = []
+                        for i in df.columns:
+                            res.append(True)
+                        res_df = pd.DataFrame(data=[res], columns=df.columns)
+                        res_df = st.data_editor(
+                            res_df,
+                            column_config={
+                                f'{i}':st.column_config.CheckboxColumn()
+                            },
+                            # hide_index=True,
+                            width=1600
+                        )
+                        cols = []
+                        for i in range(len(res_df.iloc[0])):
+                            if res_df.iloc[0][i] == True:
+                                cols.append(res_df.columns[i])
+                        df = df[cols]
                         while True:
                             df = st.data_editor(
                                 df,
@@ -545,9 +577,9 @@ elif st.session_state.page == 1:
                                 key='table'
                             )       
                     except:
-                        pass    
+                        pass
                     if st.button("Save Data"):
-                        st.session_state['data_header_df'] = df
+                        st.session_state['data_header_df'] = df[cols]
                     
                 elif option == 'Data Statistics':
                     prev_tab = st.session_state.prev_tab
@@ -632,6 +664,7 @@ elif st.session_state.page == 1:
                                 st.subheader('Filtered Dataset Preview')   
                             st.dataframe(new_df[new_df['EXCLUDE/INCLUDE']==True], use_container_width=True, hide_index=True)     
                             st.session_state['histogram_df'] = new_df
+                            st.session_state['histogram_df'].reset_index(inplace=True, drop=True)
                     except AttributeError:
                         st.error("You haven't saved the data in Data Header")
                     except ValueError:
@@ -747,8 +780,9 @@ elif st.session_state.page == 1:
                         st.session_state['corr_df'] = st.session_state['histogram_df']
                     elif st.session_state['corr_df'] is None and st.session_state['histogram_df'] is None:
                         st.session_state['corr_df'] = st.session_state['data_header_df']
+                        
                     st.session_state['EXCLUDE_df'] = st.session_state['corr_df']
-                    # t11, t22 = st.tabs(['2D','3D'])
+                    
                 
                     with stylable_container(
                         key='h3',
@@ -821,31 +855,24 @@ elif st.session_state.page == 1:
                         )
                     pntind = []
                     if scatter_chart_selected:
+                        
                         for i in range(len(scatter_chart_selected)):
                             pntind.append(st.session_state['corr_df'][(st.session_state['corr_df'][x_axis] == scatter_chart_selected[i]['x']) & (st.session_state['corr_df'][y_axis] == scatter_chart_selected[i]['y'])].index[0])
                         if EXCLUDE:
                             st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE'].iloc[pntind] = False
                             st.session_state['filter_df'] = pd.concat([st.session_state['EXCLUDE_df'][st.session_state['EXCLUDE_df']['EXCLUDE/INCLUDE']==False], st.session_state['corr_df']])#[st.session_state['corr_df']['EXCLUDE/INCLUDE']==True]
-                            st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
+                            st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates(keep='first')
                             st.rerun()
                         else:
                             st.session_state['filter_df'] = st.session_state['corr_df'].iloc[pntind]
-                        # with stylable_container(
-                        # key='h3',
-                        # css_styles="""
-                        #     h3 {
-                        #         font-size: 16px;
-                        #     }
-                        # """
-                        # ):
-                        #     st.subheader('Filtered Dataset Preview')
-                        # st.session_state['filter_df'] = st.session_state['filter_df'].drop_duplicates()
-                        
-                    # st.dataframe(st.session_state['filter_df'], use_container_width=True)#[st.session_state['filter_df']['EXCLUDE/INCLUDE']==True]
-                    # st.write(len(st.session_state['filter_df']))
+                        st.session_state['filter_df'].reset_index(inplace=True, drop=True)
+                    # st.dataframe(st.session_state['filter_df'], use_container_width=True)
+
+        with t2:
+            "Decision Tree Here"
         
                         
-        with t2:
+        with t3:
             if st.session_state['filter_df'] is None :
                 if st.session_state['prev_tab']=='Data Header':
                     if st.session_state['data_header_df'] is None:
@@ -897,7 +924,7 @@ elif st.session_state.page == 1:
                 if len(dep_vars) == 0:
                     st.warning('Choose Dependent variable')
             
-        with t3:
+        with t4:
             if st.session_state.reg:
                 try:
                     with st.container(border=True):
