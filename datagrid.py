@@ -341,7 +341,6 @@ def regre(df, indep_vars, dep_vars):
         with col7.container(border=True):
             st.info(f'''**Accuracy**: {round(acc, 2)*100}% \n\n **Time Took**: {round((time.time()-start),2)} secs''') 
         with col6.container(border=True):
-            st.write("\n\n")
             st.info("**Confusion Matrix**")
             fig = go.Figure(data=go.Heatmap(
                    z=cm,
@@ -533,12 +532,6 @@ elif st.session_state.page == 1:
                     if deselect:
                         df['EXCLUDE/INCLUDE'] = False 
                     try:
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
-                        st.write('\n')
                         with stylable_container(
                         key='h3',
                         css_styles="""
@@ -814,12 +807,6 @@ elif st.session_state.page == 1:
                     line = y_axis+' = '+ str(results.params[1]) + ' * ' + x_axis +' + '+ str(results.params[0])
                     pval = str(round(results.pvalues[1],3))
                     res_df = pd.DataFrame.from_dict({"R-Squared":[r2], 'Line equation':[line], "P-Value":[pval], "f-test":[ftest], "T-Test":[ttest] })
-                    st.write('\n')
-                    st.write('\n')
-                    st.write('\n')
-                    st.write('\n')
-                    st.write('\n')
-                    st.write('\n')
                     with stylable_container(
                         key='h3',
                         css_styles="""
