@@ -128,7 +128,7 @@ def data_cleaning(data1):
     data1.drop(data1.columns[dt],axis=1,inplace=True)
     
     # Dealing with Null values
-    data1 = mice(data1)
+    # data1 = mice(data1)
     # dropping colummns with one uniques value
     for i in data1.columns:
         if len(data1[f'{i}'].unique()) <= 1:
