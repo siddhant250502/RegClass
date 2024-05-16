@@ -6,6 +6,7 @@ import statistics
 import datetime
 import plotly.express as px
 from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix, r2_score
@@ -25,6 +26,9 @@ from imblearn.over_sampling import SMOTE
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import kaleido
+import pydotplus
+from sklearn.datasets import load_iris
+from sklearn import tree
 
 
 st.set_page_config(page_title="AI Model Analysis",layout="wide")
@@ -89,6 +93,9 @@ if 'col_name' not in st.session_state:
 if "prev_tab" not in st.session_state:
     st.session_state['prev_tab'] = "Data Header"
 
+if "model" not in st.session_state:
+    st.session_state['model'] = 0
+
     
 def nextpage(): st.session_state.page += 1
 def restart(): st.session_state.page = 0
@@ -128,6 +135,7 @@ def data_cleaning(data1):
     data1.drop(data1.columns[dt],axis=1,inplace=True)
     
     # Dealing with Null values
+    data1.fillna(0, inplace=True)
     # data1 = mice(data1)
     # dropping colummns with one uniques value
     for i in data1.columns:
@@ -149,7 +157,7 @@ def interactive_plot(df, x_axis, y_axis, ols):
     try:
         if x_axis and y_axis:
             if ols:
-                fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B','INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, trendline='ols', trendline_color_override='#000000', height=450, custom_data=[x_axis, y_axis]) 
+                fig = px.scatter(df[df['EXCLUDE/INCLUDE']=='INCLUDE'], x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'INCLUDE':'circle-open'}, trendline='ols', trendline_color_override='#000000', height=450, custom_data=[x_axis, y_axis]) 
                 fig.update_traces(hovertemplate=None)
             else:
                 fig = px.scatter(df, x=x_axis, y=y_axis, color='EXCLUDE/INCLUDE', color_discrete_map={'EXCLUDE':'#D22B2B', 'INCLUDE':'#30B9EF'}, symbol='EXCLUDE/INCLUDE', symbol_map={'EXCLUDE':'x', 'INCLUDE':'circle-open'}, height=450, custom_data=[df[x_axis], df[y_axis]])    
@@ -246,7 +254,7 @@ def correlation(df):
             lr.fit([[i] for i in df[i]], [[i] for i in df[j]])
             res_df[i][j] = lr.score([[i] for i in df[i]], [[i] for i in df[j]])
     fig = go.Figure()
-    fig.add_trace(go.Heatmap(z=res_df, x=df.columns, y=df.columns, colorscale='RdBu_r'))
+    fig.add_trace(go.Heatmap(z=res_df, x=df.columns, y=df.columns, colorscale='RdBu_r',  hovertemplate='X-Value: %{x}<br>Y-Value: %{y}<br>R2: %{z}<extra></extra>'))
     fig.update_layout(modebar_remove=['zoom', 'pan'])
     return fig
     
@@ -277,8 +285,7 @@ def regre(df, indep_vars, dep_vars):
                 st.bar_chart(forest_importances, color='#30B9EF')
         except Exception as e:
             st.error(e)
-        with open('model.pkl', 'wb') as f:
-            pickle.dump(rfr, f)
+        st.session_state['model'] = rfr
         try:
             y_pred = rfr.predict(X_test)
         except Exception as e:
@@ -301,11 +308,11 @@ def regre(df, indep_vars, dep_vars):
             
             
     else:
-        rfc = RandomForestClassifier()
-        steps = [('over', oversample)]
-        pipeline = Pipeline(steps=steps)
-        X_sm, y_sm = pipeline.fit_resample(X=X, y=y)
-        X_train, X_test, y_train, y_test = train_test_split(X_sm, y_sm, test_size=0.2, random_state=21)
+        rfc = RandomForestClassifier(max_depth = 5, max_leaf_nodes=12)
+        # steps = [('over', oversample)]
+        # pipeline = Pipeline(steps=steps)
+        # X_sm, y_sm = pipeline.fit_resample(X=X, y=y)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=21)
         
         try:
             rfc.fit(X_train, y_train)
@@ -320,8 +327,7 @@ def regre(df, indep_vars, dep_vars):
                 st.bar_chart(forest_importances, color='#1168f5')
         except Exception as e:
             st.error(e)
-        with open('model.pkl', 'wb') as f:
-            pickle.dump(rfc, f)
+        st.session_state['model'] = rfc
         try:
             y_pred = rfc.predict(X_test)
         except Exception as e:
@@ -467,7 +473,7 @@ elif st.session_state.page == 1:
            
         col1, col2, col3 = st.columns(3)
  
-        t1, t2, t3, t4 = st.tabs(['Dataset Info','Decision Tree', 'AI Model', 'Predictor'])
+        t1, t2, t3, t4 = st.tabs(['Dataset Info','AI Model', 'Decision Tree Visualization', 'Predictor'])
                   
         # Update content based on button click
         # if option=='Dataset Info':
@@ -492,6 +498,7 @@ elif st.session_state.page == 1:
                                 df = pd.read_csv(st.session_state['file_path'])
                                 df.columns = [i.upper() for i in df.columns]
                                 df = data_cleaning(df)
+                                st.session_state['filter_df'] = df
                                 df['EXCLUDE/INCLUDE'] = True
                             else:
                                 st.warning("File type Not supported")
@@ -579,9 +586,7 @@ elif st.session_state.page == 1:
                     st.session_state.prev_tab = option
                     try:
                         if prev_tab=='Data Header':
-                            if st.session_state['data_header_df'] is not None:
-                                st.session_state['data_header_df'] = st.session_state['data_header_df']
-                            else:
+                            if st.session_state['data_header_df'] is None:
                                 st.session_state['data_header_df'] = pd.read_csv(st.session_state['file_path'])
                                 st.session_state['data_header_df'].columns = [i.upper() for i in st.session_state['data_header_df'].columns]
                                 st.session_state['data_header_df'] = data_cleaning(st.session_state['data_header_df'])
@@ -667,7 +672,7 @@ elif st.session_state.page == 1:
                     prev_tab = st.session_state.prev_tab
                     st.session_state.prev_tab = option
                     # st.write(prev_tab)
-                    tab1, tab2 = st.tabs(['Heatmap', 'Table'])
+                    # tab1, tab2 = st.tabs(['Heatmap', 'Table'])
                     if prev_tab=='Data Header':
                         if st.session_state['data_header_df'] is not None:
                             # st.session_state['histogram_df'] = st.session_state['data_header_df']
@@ -703,25 +708,25 @@ elif st.session_state.page == 1:
                             heatmap = correlation(st.session_state['corr_df'][st.session_state['corr_df'].columns[:-1]])
                             st.session_state['corr_df'] = st.session_state['corr_df']
                     
-                    # if st.session_state['histogram_df'] is None:
-                    #     st.session_state['histogram_df'] = st.session_state['data_header_df']
-                    with tab1:
-                        with stylable_container(
-                            key='h3',
-                            css_styles="""
-                                h3 {
-                                    font-size: 16px;
-                                }
-                            """
-                        ):
-                            st.subheader('Correlation Matrix Heatmap')
-                        # heatmap = correlation(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
-                        config = {'displayModeBar':False}
-                        # heatmap_selected = plotly_events(
-                        #     heatmap,
-                        #     click_event=True
-                        # )
-                        st.plotly_chart(heatmap, use_container_width=True, config=config)
+                    if st.session_state['histogram_df'] is None:
+                        st.session_state['histogram_df'] = st.session_state['data_header_df']
+                    # with tab1:
+                    #     with stylable_container(
+                    #         key='h3',
+                    #         css_styles="""
+                    #             h3 {
+                    #                 font-size: 16px;
+                    #             }
+                    #         """
+                    #     ):
+                    #         st.subheader('Correlation Matrix Heatmap')
+                    #     heatmap = correlation(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
+                    #     # config = {'displayModeBar':False}
+                    #     heatmap_selected = plotly_events(
+                    #         heatmap,
+                    #         click_event=True
+                    #     )
+                    #     # st.plotly_chart(heatmap, use_container_width=True, config=config)
                         
                     #     if heatmap_selected:
                     #         st.session_state['col_name'].add(heatmap_selected[0]['x'])
@@ -743,8 +748,8 @@ elif st.session_state.page == 1:
                     #         st.session_state['corr_df'] = st.session_state['histogram_df'][cols]
                     #         st.dataframe(st.session_state['corr_df'], hide_index=True, use_container_width=True)
                     # with tab2:
-                    #     table = r_square(st.session_state['histogram_df'][st.session_state['histogram_df'].columns[:-1]])
-                    #     st.dataframe(table, width=600, hide_index=True)
+                    table = r_square(st.session_state['corr_df'][st.session_state['corr_df'].columns[:-1]])
+                    st.dataframe(table, width=600, hide_index=True)
                              
                 elif option=='Plot':  
                     prev_tab = st.session_state.prev_tab
@@ -776,7 +781,6 @@ elif st.session_state.page == 1:
                         
                     st.session_state['EXCLUDE_df'] = st.session_state['corr_df']
                     
-                
                     with stylable_container(
                         key='h3',
                         css_styles="""
@@ -854,12 +858,8 @@ elif st.session_state.page == 1:
                             st.session_state['filter_df'] = st.session_state['corr_df'].iloc[pntind]
                         st.session_state['filter_df'].reset_index(inplace=True, drop=True)
                     # st.dataframe(st.session_state['filter_df'], use_container_width=True)
-
-        with t2:
-            "Decision Tree Here"
-        
                         
-        with t3:
+        with t2:
             if st.session_state['filter_df'] is None :
                 if st.session_state['prev_tab']=='Data Header':
                     if st.session_state['data_header_df'] is None:
@@ -900,6 +900,7 @@ elif st.session_state.page == 1:
                 st.session_state.indep_vars, st.session_state.dep_vars = indep_vars, dep_vars
                 if len(indep_vars)>=1 and len(dep_vars)>=1:
                     data = st.session_state['filter_df'][indep_vars+dep_vars]
+
                 if perf_reg:
                     regre(data, indep_vars, dep_vars)
                     st.session_state.reg = True
@@ -911,47 +912,104 @@ elif st.session_state.page == 1:
                 if len(dep_vars) == 0:
                     st.warning('Choose Dependent variable')
             
+        with t3:
+            try:
+                model = st.session_state['model']
+                dot_data = export_graphviz(model.estimators_[0], out_file=None,
+                                    feature_names=st.session_state['filter_df'].columns[:-2],
+                                    class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
+                                    filled=True, rounded=True,
+                                    special_characters=True)
+                # st.graphviz_chart(dot_data)
+                graph = pydotplus.graph_from_dot_data(dot_data)
+                for node in graph.get_node_list():
+                    if node.get_attributes().get('label') is None:
+                        continue
+                    if 'samples = ' in node.get_attributes()['label']:
+                        labels = node.get_attributes()['label'].split('<br/>')
+                        for i, label in enumerate(labels):
+                            if label.startswith('samples = '):
+                                labels[i] = 'samples = 0'
+                        node.set('label', '<br/>'.join(labels))
+                        node.set_fillcolor('white')
+                st.image(graph.create_png())
+            except:
+                st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+
+
         with t4:
+            # st.session_state.dep_vars
+            # st.write(data[st.session_state.dep_vars[0]].unique().to_array())
             if st.session_state.reg:
+                model = st.session_state['model']
                 try:
-                    with st.container(border=True):
+                    col1, col2 = st.columns([1,7]) 
+                    with col1:
                         slider_val = []
                         for i in st.session_state.indep_vars:
-                            slider_val.append(st.slider(i, float(st.session_state['filter_df'][i].min()), float(st.session_state['filter_df'][i].max()), float(st.session_state['filter_df'][i].mean())))
-                    
-                    model = pickle.load(open('model.pkl', 'rb'))
-                    pred = model.predict([slider_val])
-                    
-                    num_steps = 100  
-                    colors = []
-                    pred_dict = {}
-                    val = pred
-                    min = float(st.session_state['filter_df'][st.session_state.dep_vars].min())
-                    maxim = float(st.session_state['filter_df'][st.session_state.dep_vars].max())
-                    steps = (min+maxim)/100
-                    for i in range(num_steps):
-                        red = 255.0 if i < num_steps / 2 else 1.0 - (2.0 * (i - num_steps / 2) / num_steps)
-                        green = 1.0 - abs(i - num_steps / 2) / num_steps
-                        blue = 1.0 if i >= num_steps / 2 else 1.0 - (2.0 * (num_steps / 2 - i) / num_steps)
-                        colors.append((red, green, blue))
-                    for i in range(num_steps):
-                        if min<=val and min+steps>=val:
-                            pred_dict[str(min)] = (0,0,0)
-                            pred_dict[str(min+steps)] = (0,0,0)
-                        else:
-                            pred_dict[str(min)] = colors[i]
-                        min+=steps
-                    color_pal = pred_dict.values()
-                    plt.figure(figsize=(10, 2))
-                    plt.imshow([list(color_pal)], extent=[0, num_steps, 0, 1])
-                    plt.axis('off')
-                    with st.container(border=True):
-                        st.write('Predicted Value')
-                        st.pyplot(plt, use_container_width=True)
-                        st.slider('', float(st.session_state['filter_df'][st.session_state.dep_vars].min()), float(st.session_state['filter_df'][st.session_state.dep_vars].max()), float(pred[0]), disabled=True)
-                        st.info(f'Predicted value is {float(pred[0])}')
-                    
+                            slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
+                    with col2:
+                        
+                        graph = pydotplus.graph_from_dot_data(dot_data)
+                        for node in graph.get_node_list():
+                            if node.get_attributes().get('label') is None:
+                                continue
+                            if 'samples = ' in node.get_attributes()['label']:
+                                labels = node.get_attributes()['label'].split('<br/>')
+                                for i, label in enumerate(labels):
+                                    if label.startswith('samples = '):
+                                        labels[i] = 'samples = 0'
+                                node.set('label', '<br/>'.join(labels))
+                                node.set_fillcolor('white')
 
+                        cols = [i for i in range(len(slider_val))]
+                        samples = pd.DataFrame(data=[slider_val], columns=cols)
+                        # st.write(samples)
+                        decision_paths = model.estimators_[0].decision_path(samples)
+
+                        for decision_path in decision_paths:
+                            for n, node_value in enumerate(decision_path.toarray()[0]):
+                                if node_value == 0:
+                                    continue
+                                node = graph.get_node(str(n))[0]            
+                                node.set_fillcolor('green')
+                                labels = node.get_attributes()['label'].split('<br/>')
+                                for i, label in enumerate(labels):
+                                    if label.startswith('samples = '):
+                                        labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
+
+                                node.set('label', '<br/>'.join(labels))
+                        st.image(graph.create_png())
+
+                    pred = model.predict([slider_val])
+                    # num_steps = 100  
+                    # colors = []
+                    # pred_dict = {}
+                    # val = pred
+                    # min = float(st.session_state['filter_df'][st.session_state.dep_vars].min())
+                    # maxim = float(st.session_state['filter_df'][st.session_state.dep_vars].max())
+                    # steps = (min+maxim)/100
+                    # for i in range(num_steps):
+                    #     red = 255.0 if i < num_steps / 2 else 1.0 - (2.0 * (i - num_steps / 2) / num_steps)
+                    #     green = 1.0 - abs(i - num_steps / 2) / num_steps
+                    #     blue = 1.0 if i >= num_steps / 2 else 1.0 - (2.0 * (num_steps / 2 - i) / num_steps)
+                    #     colors.append((red, green, blue))
+                    # for i in range(num_steps):
+                    #     if min<=val and min+steps>=val:
+                    #         pred_dict[str(min)] = (0,0,0)
+                    #         pred_dict[str(min+steps)] = (0,0,0)
+                    #     else:
+                    #         pred_dict[str(min)] = colors[i]
+                    #     min+=steps
+                    # color_pal = pred_dict.values()
+                    # plt.figure(figsize=(10, 2))
+                    # plt.imshow([list(color_pal)], extent=[0, num_steps, 0, 1])
+                    # plt.axis('off')
+                    with st.container(border=True):
+                        # st.write('Predicted Value')
+                        # st.pyplot(plt, use_container_width=True)
+                        # st.slider('', float(st.session_state['filter_df'][st.session_state.dep_vars].min()), float(st.session_state['filter_df'][st.session_state.dep_vars].max()), float(pred[0]), disabled=True)
+                        st.info(f'Predicted value is {float(pred[0])}')
                 except AttributeError:
                     st.warning('Please select your Independent and Dependent variables')
                 except KeyError as e:
