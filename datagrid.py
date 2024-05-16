@@ -948,7 +948,6 @@ elif st.session_state.page == 1:
                         for i in st.session_state.indep_vars:
                             slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
                     with col2:
-                        
                         graph = pydotplus.graph_from_dot_data(dot_data)
                         for node in graph.get_node_list():
                             if node.get_attributes().get('label') is None:
@@ -978,7 +977,8 @@ elif st.session_state.page == 1:
                                         labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
 
                                 node.set('label', '<br/>'.join(labels))
-                        st.image(graph.create_png())
+                            st.write('Decision tree')
+                        # st.image(graph.create_png())
 
                     pred = model.predict([slider_val])
                     # num_steps = 100  
