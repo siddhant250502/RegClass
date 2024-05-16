@@ -931,7 +931,8 @@ elif st.session_state.page == 1:
                                 labels[i] = 'samples = 0'
                         node.set('label', '<br/>'.join(labels))
                         node.set_fillcolor('white')
-                st.image(graph.create_png())
+                st.write('DT')
+                # st.image(graph.create_png())
             # except:
             #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
