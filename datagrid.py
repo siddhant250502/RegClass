@@ -912,7 +912,7 @@ elif st.session_state.page == 1:
                     st.warning('Choose Dependent variable')
             
         with t3:
-            # try:
+            try:
                 model = st.session_state['model']
                 dot_data = export_graphviz(model.estimators_[0], out_file=None,
                                     feature_names=st.session_state['filter_df'].columns[:-2],
@@ -931,12 +931,9 @@ elif st.session_state.page == 1:
                                 labels[i] = 'samples = 0'
                         node.set('label', '<br/>'.join(labels))
                         node.set_fillcolor('white')
-                st.write('DT')
-                # graph.write_png('tree.png')
-                # st.image('tree.png')
-                # st.image(graph.create_png())
-            # except:
-            #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+                st.image(graph.create_png())
+            except:
+                st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
 
         with t4:
@@ -944,6 +941,11 @@ elif st.session_state.page == 1:
             # st.write(data[st.session_state.dep_vars[0]].unique().to_array())
             if st.session_state.reg:
                 model = st.session_state['model']
+                dot_data = export_graphviz(model.estimators_[0], out_file=None,
+                                    feature_names=st.session_state['filter_df'].columns[:-2],
+                                    class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
+                                    filled=True, rounded=True,
+                                    special_characters=True)
                 try:
                     col1, col2 = st.columns([1,7]) 
                     with col1:
@@ -951,6 +953,7 @@ elif st.session_state.page == 1:
                         for i in st.session_state.indep_vars:
                             slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
                     with col2:
+                        
                         graph = pydotplus.graph_from_dot_data(dot_data)
                         for node in graph.get_node_list():
                             if node.get_attributes().get('label') is None:
@@ -980,8 +983,7 @@ elif st.session_state.page == 1:
                                         labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
 
                                 node.set('label', '<br/>'.join(labels))
-                            st.write('Decision tree')
-                        # st.image(graph.create_png())
+                        st.image(graph.create_png())
 
                     pred = model.predict([slider_val])
                     # num_steps = 100  
