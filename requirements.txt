@@ -12,5 +12,5 @@ TIME-python
 streamlit_pandas_profiling
 ydata_profiling
 matplotlib
-
+pydotplus
 
