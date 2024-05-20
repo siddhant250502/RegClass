@@ -919,7 +919,7 @@ elif st.session_state.page == 1:
                                     class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
                                     filled=True, rounded=True,
                                     special_characters=True)
-                # st.graphviz_chart(dot_data)
+                st.graphviz_chart(dot_data)
                 graph = pydotplus.graph_from_dot_data(dot_data)
                 for node in graph.get_node_list():
                     if node.get_attributes().get('label') is None:
@@ -931,7 +931,8 @@ elif st.session_state.page == 1:
                                 labels[i] = 'samples = 0'
                         node.set('label', '<br/>'.join(labels))
                         node.set_fillcolor('white')
-                st.image(graph.create_png())
+                # graph.write_png('tree.png')
+                # st.image('tree.png')
             except:
                 st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
