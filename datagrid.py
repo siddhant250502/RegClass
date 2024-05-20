@@ -912,29 +912,29 @@ elif st.session_state.page == 1:
                     st.warning('Choose Dependent variable')
             
         with t3:
-            try:
-                model = st.session_state['model']
-                dot_data = export_graphviz(model.estimators_[0], out_file=None,
-                                    feature_names=st.session_state['filter_df'].columns[:-2],
-                                    class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
-                                    filled=True, rounded=True,
-                                    special_characters=True)
-                st.graphviz_chart(dot_data)
-                graph = pydotplus.graph_from_dot_data(dot_data)
-                for node in graph.get_node_list():
-                    if node.get_attributes().get('label') is None:
-                        continue
-                    if 'samples = ' in node.get_attributes()['label']:
-                        labels = node.get_attributes()['label'].split('<br/>')
-                        for i, label in enumerate(labels):
-                            if label.startswith('samples = '):
-                                labels[i] = 'samples = 0'
-                        node.set('label', '<br/>'.join(labels))
-                        node.set_fillcolor('white')
-                # graph.write_png('tree.png')
-                # st.image('tree.png')
-            except:
-                st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+            # try:
+            #     model = st.session_state['model']
+            #     dot_data = export_graphviz(model.estimators_[0], out_file=None,
+            #                         feature_names=st.session_state['filter_df'].columns[:-2],
+            #                         class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
+            #                         filled=True, rounded=True,
+            #                         special_characters=True)
+            #     st.graphviz_chart(dot_data)
+            #     graph = pydotplus.graph_from_dot_data(dot_data)
+            #     for node in graph.get_node_list():
+            #         if node.get_attributes().get('label') is None:
+            #             continue
+            #         if 'samples = ' in node.get_attributes()['label']:
+            #             labels = node.get_attributes()['label'].split('<br/>')
+            #             for i, label in enumerate(labels):
+            #                 if label.startswith('samples = '):
+            #                     labels[i] = 'samples = 0'
+            #             node.set('label', '<br/>'.join(labels))
+            #             node.set_fillcolor('white')
+            #     # graph.write_png('tree.png')
+            #     # st.image('tree.png')
+            # except:
+            #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
 
         with t4:
@@ -955,36 +955,36 @@ elif st.session_state.page == 1:
                             slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
                     with col2:
                         
-                        graph = pydotplus.graph_from_dot_data(dot_data)
-                        for node in graph.get_node_list():
-                            if node.get_attributes().get('label') is None:
-                                continue
-                            if 'samples = ' in node.get_attributes()['label']:
-                                labels = node.get_attributes()['label'].split('<br/>')
-                                for i, label in enumerate(labels):
-                                    if label.startswith('samples = '):
-                                        labels[i] = 'samples = 0'
-                                node.set('label', '<br/>'.join(labels))
-                                node.set_fillcolor('white')
+                        # graph = pydotplus.graph_from_dot_data(dot_data)
+                        # for node in graph.get_node_list():
+                        #     if node.get_attributes().get('label') is None:
+                        #         continue
+                        #     if 'samples = ' in node.get_attributes()['label']:
+                        #         labels = node.get_attributes()['label'].split('<br/>')
+                        #         for i, label in enumerate(labels):
+                        #             if label.startswith('samples = '):
+                        #                 labels[i] = 'samples = 0'
+                        #         node.set('label', '<br/>'.join(labels))
+                        #         node.set_fillcolor('white')
 
-                        cols = [i for i in range(len(slider_val))]
-                        samples = pd.DataFrame(data=[slider_val], columns=cols)
-                        # st.write(samples)
-                        decision_paths = model.estimators_[0].decision_path(samples)
+                        # cols = [i for i in range(len(slider_val))]
+                        # samples = pd.DataFrame(data=[slider_val], columns=cols)
+                        # # st.write(samples)
+                        # decision_paths = model.estimators_[0].decision_path(samples)
 
-                        for decision_path in decision_paths:
-                            for n, node_value in enumerate(decision_path.toarray()[0]):
-                                if node_value == 0:
-                                    continue
-                                node = graph.get_node(str(n))[0]            
-                                node.set_fillcolor('green')
-                                labels = node.get_attributes()['label'].split('<br/>')
-                                for i, label in enumerate(labels):
-                                    if label.startswith('samples = '):
-                                        labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
+                        # for decision_path in decision_paths:
+                        #     for n, node_value in enumerate(decision_path.toarray()[0]):
+                        #         if node_value == 0:
+                        #             continue
+                        #         node = graph.get_node(str(n))[0]            
+                        #         node.set_fillcolor('green')
+                        #         labels = node.get_attributes()['label'].split('<br/>')
+                        #         for i, label in enumerate(labels):
+                        #             if label.startswith('samples = '):
+                        #                 labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
 
-                                node.set('label', '<br/>'.join(labels))
-                        st.image(graph.create_png())
+                        #         node.set('label', '<br/>'.join(labels))
+                        # st.image(graph.create_png())
 
                     pred = model.predict([slider_val])
                     # num_steps = 100  
