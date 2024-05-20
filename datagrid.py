@@ -912,6 +912,7 @@ elif st.session_state.page == 1:
                     st.warning('Choose Dependent variable')
             
         with t3:
+            st.write('DT')
             # try:
             #     model = st.session_state['model']
             #     dot_data = export_graphviz(model.estimators_[0], out_file=None,
