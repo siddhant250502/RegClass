@@ -930,8 +930,22 @@ elif st.session_state.page == 1:
                     dot_data = dot_data.replace(i,'white')
                 # dot_data
                 st.graphviz_chart(dot_data)
+                graph = pydotplus.graph_from_dot_data(dot_data)
+                for node in graph.get_node_list():
+                    if node.get_attributes().get('label') is None:
+                        continue
+                    if 'samples = ' in node.get_attributes()['label']:
+                        labels = node.get_attributes()['label'].split('<br/>')
+                        for i, label in enumerate(labels):
+                            if label.startswith('samples = '):
+                                labels[i] = 'samples = 0'
+                        node.set('label', '<br/>'.join(labels))
+                        node.set_fillcolor('white')
+                graph.write_png('tree.png')
+                st.image('tree.png')
             except:
                 st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+
             #     model = st.session_state['model']
             #     dot_data = export_graphviz(model.estimators_[0], out_file=None,
             #                         feature_names=st.session_state['filter_df'].columns[:-2],
@@ -939,21 +953,7 @@ elif st.session_state.page == 1:
             #                         filled=True, rounded=True,
             #                         special_characters=True)
             #     st.graphviz_chart(dot_data)
-            #     graph = pydotplus.graph_from_dot_data(dot_data)
-            #     for node in graph.get_node_list():
-            #         if node.get_attributes().get('label') is None:
-            #             continue
-            #         if 'samples = ' in node.get_attributes()['label']:
-            #             labels = node.get_attributes()['label'].split('<br/>')
-            #             for i, label in enumerate(labels):
-            #                 if label.startswith('samples = '):
-            #                     labels[i] = 'samples = 0'
-            #             node.set('label', '<br/>'.join(labels))
-            #             node.set_fillcolor('white')
-            #     # graph.write_png('tree.png')
-            #     # st.image('tree.png')
-            
-
+                
 
         with t4:
             # st.session_state.dep_vars
