@@ -903,6 +903,7 @@ elif st.session_state.page == 1:
                 if perf_reg:
                     regre(data, indep_vars, dep_vars)
                     st.session_state.reg = True
+                st.session_state['filter_df']=st.session_state['filter_df'][indep_vars+dep_vars]
             except AttributeError:
                 pass
             except NameError:
