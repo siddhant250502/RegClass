@@ -6,7 +6,6 @@ streamlit-plotly-events
 streamlit-extras
 imblearn
 graphviz
-graphviz-py
 pydotplus
 kaleido
 DateTime
