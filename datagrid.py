@@ -914,7 +914,7 @@ elif st.session_state.page == 1:
             
         with t3:
             # st.write('DT')
-            try:
+            # try:
                 model = st.session_state['model']
                 dot_data = export_graphviz(model.estimators_[0], out_file=None,
                                     feature_names=st.session_state['filter_df'].columns[:-1],
@@ -946,16 +946,16 @@ elif st.session_state.page == 1:
                 #         node.set_fillcolor('white')
                 # graph.write_png('tree.png')
                 # st.image('tree.png')
-            except:
-                st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+            # except:
+            #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
-            #     model = st.session_state['model']
-            #     dot_data = export_graphviz(model.estimators_[0], out_file=None,
-            #                         feature_names=st.session_state['filter_df'].columns[:-2],
-            #                         class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
-            #                         filled=True, rounded=True,
-            #                         special_characters=True)
-            #     st.graphviz_chart(dot_data)
+                # model = st.session_state['model']
+                # dot_data = export_graphviz(model.estimators_[0], out_file=None,
+                #                     feature_names=st.session_state['filter_df'].columns[:-2],
+                #                     class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
+                #                     filled=True, rounded=True,
+                #                     special_characters=True)
+                # st.graphviz_chart(dot_data)
                 
 
         with t4:
