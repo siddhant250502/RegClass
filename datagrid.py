@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix, r2_score
 import plotly.graph_objects as go
 import time
+import graphviz
 from scipy.stats import norm
 from sklearn.decomposition import PCA
 import numpy as np
