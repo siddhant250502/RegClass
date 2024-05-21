@@ -912,8 +912,25 @@ elif st.session_state.page == 1:
                     st.warning('Choose Dependent variable')
             
         with t3:
-            st.write('DT')
-            # try:
+            # st.write('DT')
+            try:
+                model = st.session_state['model']
+                dot_data = export_graphviz(model.estimators_[0], out_file=None,
+                                    feature_names=st.session_state['filter_df'].columns[:-1],
+                                    class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
+                                    filled=True, rounded=True,
+                                    special_characters=True)
+                # dot_data
+                dd_arr = []
+                for i in range(len(dot_data)):
+                    if dot_data[i:i+10] == 'fillcolor=':
+                        dd_arr.append(dot_data[i+11:i+18])
+                for i in dd_arr:
+                    dot_data = dot_data.replace(i,'white')
+                # dot_data
+                st.graphviz_chart(dot_data)
+            except:
+                st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
             #     model = st.session_state['model']
             #     dot_data = export_graphviz(model.estimators_[0], out_file=None,
             #                         feature_names=st.session_state['filter_df'].columns[:-2],
@@ -934,8 +951,7 @@ elif st.session_state.page == 1:
             #             node.set_fillcolor('white')
             #     # graph.write_png('tree.png')
             #     # st.image('tree.png')
-            # except:
-            #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+            
 
 
         with t4:
