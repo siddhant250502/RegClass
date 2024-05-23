@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 import os
-# from imblearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline
 import statistics
 import datetime
+import graphviz
 import plotly.express as px
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
@@ -12,7 +13,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix, r2_score
 import plotly.graph_objects as go
 import time
-import graphviz
 from scipy.stats import norm
 from sklearn.decomposition import PCA
 import numpy as np
@@ -23,7 +23,7 @@ from streamlit_option_menu import option_menu
 import toml
 import math
 from streamlit_extras.stylable_container import stylable_container
-from imblearn.over_sampling import SMOTE
+# from imblearn.over_sampling import SMOTE
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import kaleido
@@ -267,7 +267,7 @@ def regre(df, indep_vars, dep_vars):
     df = data_cleaning(df)
     X = df[indep_vars]
     y = df[dep_vars[0]]
-    oversample = SMOTE()
+    # oversample = SMOTE()
     # undersample = 
 
     if len(y.unique()) >= 10:
@@ -372,10 +372,10 @@ def plot_chart(y_test, y_pred):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-def oversampling(X_train, y_train):
-    smt=SMOTE()
-    X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
-    return X_train_sm, Y_train_sm
+# def oversampling(X_train, y_train):
+#     smt=SMOTE()
+#     X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
+#     return X_train_sm, Y_train_sm
        
   
 if st.session_state.page == 0:
@@ -861,26 +861,27 @@ elif st.session_state.page == 1:
                     # st.dataframe(st.session_state['filter_df'], use_container_width=True)
                         
         with t2:
-            if st.session_state['prev_tab']=='Data Header':
-                if st.session_state['data_header_df'] is None:
-                    st.session_state['filter_df'] = df
-                else:
-                    st.session_state['filter_df'] = st.session_state['data_header_df']
-                    
-            elif st.session_state['prev_tab'] == 'Data Statistics':
-                if st.session_state['histogram_df'] is None:
-                    st.session_state['filter_df'] = st.session_state['data_header_df']
-                else:
-                    st.session_state['filter_df'] = st.session_state['histogram_df']
-                    
-            elif st.session_state['prev_tab']=='Corelation Matrix':
-                if st.session_state['corr_df'] is None:
-                    st.session_state['filter_df'] = st.session_state['histogram_df']
-                else:
-                    st.session_state['filter_df'] = st.session_state['corr_df']
-                    
-            elif st.session_state['prev_tab']=='Plot':
-                    st.session_state['filter_df'] = st.session_state['corr_df']
+            if st.session_state['filter_df'] is None :
+                if st.session_state['prev_tab']=='Data Header':
+                    if st.session_state['data_header_df'] is None:
+                        st.session_state['filter_df'] = df
+                    else:
+                        st.session_state['filter_df'] = st.session_state['data_header_df']
+                        
+                elif st.session_state['prev_tab'] == 'Data Statistics':
+                    if st.session_state['histogram_df'] is None:
+                        st.session_state['filter_df'] = st.session_state['data_header_df']
+                    else:
+                        st.session_state['filter_df'] = st.session_state['histogram_df']
+                        
+                elif st.session_state['prev_tab']=='Corelation Matrix':
+                    if st.session_state['corr_df'] is None:
+                        st.session_state['filter_df'] = st.session_state['histogram_df']
+                    else:
+                        st.session_state['filter_df'] = st.session_state['corr_df']
+                        
+                elif st.session_state['prev_tab']=='Plot':
+                        st.session_state['filter_df'] = st.session_state['corr_df']
                     
             st.title('AI Model Analysis')
             col4, col5, c6  = st.columns([1,1,0.2])
@@ -914,7 +915,7 @@ elif st.session_state.page == 1:
                     st.warning('Choose Dependent variable')
             
         with t3:
-            # st.write('DT')
+            # st.session_state['filter_df']
             # try:
                 model = st.session_state['model']
                 dot_data = export_graphviz(model.estimators_[0], out_file=None,
@@ -934,7 +935,9 @@ elif st.session_state.page == 1:
                 gr = graphviz.Source(dot_data)
                 gr.format = "png"
                 st.image("file_name.png")
+                st.graphviz_chart(gr)
                 # graph = pydotplus.graph_from_dot_data(dot_data)
+                # # st.write(graph.get_node_list()[2].get_attributes()['label'].split('<br/>'))
                 # for node in graph.get_node_list():
                 #     if node.get_attributes().get('label') is None:
                 #         continue
@@ -945,19 +948,10 @@ elif st.session_state.page == 1:
                 #                 labels[i] = 'samples = 0'
                 #         node.set('label', '<br/>'.join(labels))
                 #         node.set_fillcolor('white')
-                # graph.write_png('tree.png')
-                # st.image('tree.png')
+                # st.image(graph.create_png())
             # except:
             #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
-                # model = st.session_state['model']
-                # dot_data = export_graphviz(model.estimators_[0], out_file=None,
-                #                     feature_names=st.session_state['filter_df'].columns[:-2],
-                #                     class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-2]].unique()],
-                #                     filled=True, rounded=True,
-                #                     special_characters=True)
-                # st.graphviz_chart(dot_data)
-                
 
         with t4:
             # st.session_state.dep_vars
@@ -975,38 +969,37 @@ elif st.session_state.page == 1:
                         slider_val = []
                         for i in st.session_state.indep_vars:
                             slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
-                    # with col2:
-                        
-                        # graph = pydotplus.graph_from_dot_data(dot_data)
-                        # for node in graph.get_node_list():
-                        #     if node.get_attributes().get('label') is None:
-                        #         continue
-                        #     if 'samples = ' in node.get_attributes()['label']:
-                        #         labels = node.get_attributes()['label'].split('<br/>')
-                        #         for i, label in enumerate(labels):
-                        #             if label.startswith('samples = '):
-                        #                 labels[i] = 'samples = 0'
-                        #         node.set('label', '<br/>'.join(labels))
-                        #         node.set_fillcolor('white')
+                    with col2:
+                        graph = pydotplus.graph_from_dot_data(dot_data)
+                        for node in graph.get_node_list():
+                            if node.get_attributes().get('label') is None:
+                                continue
+                            if 'samples = ' in node.get_attributes()['label']:
+                                labels = node.get_attributes()['label'].split('<br/>')
+                                for i, label in enumerate(labels):
+                                    if label.startswith('samples = '):
+                                        labels[i] = 'samples = 0'
+                                node.set('label', '<br/>'.join(labels))
+                                node.set_fillcolor('white')
 
-                        # cols = [i for i in range(len(slider_val))]
-                        # samples = pd.DataFrame(data=[slider_val], columns=cols)
-                        # # st.write(samples)
-                        # decision_paths = model.estimators_[0].decision_path(samples)
+                        cols = [i for i in range(len(slider_val))]
+                        samples = pd.DataFrame(data=[slider_val], columns=cols)
+                        # st.write(samples)
+                        decision_paths = model.estimators_[0].decision_path(samples)
 
-                        # for decision_path in decision_paths:
-                        #     for n, node_value in enumerate(decision_path.toarray()[0]):
-                        #         if node_value == 0:
-                        #             continue
-                        #         node = graph.get_node(str(n))[0]            
-                        #         node.set_fillcolor('green')
-                        #         labels = node.get_attributes()['label'].split('<br/>')
-                        #         for i, label in enumerate(labels):
-                        #             if label.startswith('samples = '):
-                        #                 labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
+                        for decision_path in decision_paths:
+                            for n, node_value in enumerate(decision_path.toarray()[0]):
+                                if node_value == 0:
+                                    continue
+                                node = graph.get_node(str(n))[0]            
+                                node.set_fillcolor('green')
+                                labels = node.get_attributes()['label'].split('<br/>')
+                                for i, label in enumerate(labels):
+                                    if label.startswith('samples = '):
+                                        labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
 
-                        #         node.set('label', '<br/>'.join(labels))
-                        # st.image(graph.create_png())
+                                node.set('label', '<br/>'.join(labels))
+                        st.image(graph.create_png())
 
                     pred = model.predict([slider_val])
                     # num_steps = 100  
