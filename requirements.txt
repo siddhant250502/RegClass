@@ -4,7 +4,6 @@ scikit-learn
 streamlit-option-menu
 streamlit-plotly-events
 streamlit-extras
-imblearn
 graphviz
 pipeline
 pydotplus
