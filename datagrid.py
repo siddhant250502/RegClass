@@ -23,7 +23,7 @@ from streamlit_option_menu import option_menu
 import toml
 import math
 from streamlit_extras.stylable_container import stylable_container
-# from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import kaleido
@@ -267,7 +267,7 @@ def regre(df, indep_vars, dep_vars):
     df = data_cleaning(df)
     X = df[indep_vars]
     y = df[dep_vars[0]]
-    # oversample = SMOTE()
+    oversample = SMOTE()
     # undersample = 
 
     if len(y.unique()) >= 10:
@@ -372,10 +372,10 @@ def plot_chart(y_test, y_pred):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# def oversampling(X_train, y_train):
-#     smt=SMOTE()
-#     X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
-#     return X_train_sm, Y_train_sm
+def oversampling(X_train, y_train):
+    smt=SMOTE()
+    X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
+    return X_train_sm, Y_train_sm
        
   
 if st.session_state.page == 0:
@@ -930,12 +930,13 @@ elif st.session_state.page == 1:
                         dd_arr.append(dot_data[i+11:i+18])
                 for i in dd_arr:
                     dot_data = dot_data.replace(i,'white')
-                # dot_data
+                dot_data
                 st.graphviz_chart(dot_data)
                 gr = graphviz.Source(dot_data)
-                gr.format = "png"
-                st.image("file_name.png")
-                st.graphviz_chart(gr)
+                st.write(gr.node)
+                # gr.format = "png"
+                # st.image("file_name.png")
+                # st.graphviz_chart(gr)
                 # graph = pydotplus.graph_from_dot_data(dot_data)
                 # # st.write(graph.get_node_list()[2].get_attributes()['label'].split('<br/>'))
                 # for node in graph.get_node_list():
@@ -956,6 +957,8 @@ elif st.session_state.page == 1:
         with t4:
             # st.session_state.dep_vars
             # st.write(data[st.session_state.dep_vars[0]].unique().to_array())
+            if 'val' not in st.session_state:
+                st.session_state['val'] = [st.session_state['filter_df'][i].min() for i in st.session_state['filter_df'].columns[1:]]
             if st.session_state.reg:
                 model = st.session_state['model']
                 dot_data = export_graphviz(model.estimators_[0], out_file=None,
@@ -966,9 +969,13 @@ elif st.session_state.page == 1:
                 try:
                     col1, col2 = st.columns([1,7]) 
                     with col1:
+                        number_input_value = []
                         slider_val = []
-                        for i in st.session_state.indep_vars:
-                            slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
+                        for num,column in enumerate(st.session_state.indep_vars):
+                            number_input_value.append(st.number_input(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max()))
+                            slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num], label_visibility='collapsed'))
+                        # for i in st.session_state.indep_vars:
+                        #     slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
                     with col2:
                         graph = pydotplus.graph_from_dot_data(dot_data)
                         for node in graph.get_node_list():
