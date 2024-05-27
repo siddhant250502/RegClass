@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-from imblearn.pipeline import Pipeline
+# from imblearn.pipeline import Pipeline
 import statistics
 import datetime
 import graphviz
@@ -311,7 +311,7 @@ def regre(df, indep_vars, dep_vars):
     else:
         rfc = RandomForestClassifier(max_depth = 5, max_leaf_nodes=12)
         # steps = [('over', oversample)]
-        # pipeline = Pipeline(steps=steps)
+        #  = Pipeline(steps=steps)
         # X_sm, y_sm = pipeline.fit_resample(X=X, y=y)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=21)
         
