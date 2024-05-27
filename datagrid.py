@@ -23,7 +23,7 @@ from streamlit_option_menu import option_menu
 import toml
 import math
 from streamlit_extras.stylable_container import stylable_container
-from imblearn.over_sampling import SMOTE
+# from imblearn.over_sampling import SMOTE
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import kaleido
@@ -267,7 +267,7 @@ def regre(df, indep_vars, dep_vars):
     df = data_cleaning(df)
     X = df[indep_vars]
     y = df[dep_vars[0]]
-    oversample = SMOTE()
+    # oversample = SMOTE()
     # undersample = 
 
     if len(y.unique()) >= 10:
@@ -373,8 +373,8 @@ def plot_chart(y_test, y_pred):
     st.plotly_chart(fig, use_container_width=True)
 
 def oversampling(X_train, y_train):
-    smt=SMOTE()
-    X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
+    # smt=SMOTE()
+    # X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
     return X_train_sm, Y_train_sm
        
   
