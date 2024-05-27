@@ -1006,7 +1006,8 @@ elif st.session_state.page == 1:
                                         labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
 
                                 node.set('label', '<br/>'.join(labels))
-                        st.image(graph.create_png())
+                        graph.write_png('tree1.png')
+                        st.image('tree1.png')
 
                     pred = model.predict([slider_val])
                     # num_steps = 100  
