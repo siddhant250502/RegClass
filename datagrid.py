@@ -930,40 +930,6 @@ elif st.session_state.page == 1:
                 for i in dd_arr:
                     dot_data = dot_data.replace(i,'white')
                 st.graphviz_chart(dot_data)
-                # st.graphviz_chart(dot_data.splitlines())
-                # f=graphviz.Digraph(filename='output/filled_colorful_organogram.gv')
-                # names = ["A","B","C","D","E","F","G","H"]
-                # positions = ["CEO","Team A Lead","Team B Lead", "Staff A","Staff B", "Staff C", "Staff D", "Staff E"]
-                # colors = ["black", "skyblue", "mistyrose", "skyblue", "skyblue", "mistyrose", "mistyrose", "mistyrose"]
-                # for name, position, color in zip(names, positions, colors):
-                #     if name== "A":
-                #         f.node(name, position, color = color)
-                #     else:
-                #         f.node(name, position, style = "filled", color = color)
-                    
-                # #Specify edges
-                # f.edge("A","B"); f.edge("A","C")   #CEO to Team Leads
-                # f.edge("B","D"); f.edge("B","E")   #Team A relationship
-                # f.edge("C","F"); f.edge("C","G"); f.edge("C","H")   #Team B relationship
-                # st.graphviz_chart(f)
-                # for i in gr:
-                #     dot
-                # gr.format = "png"``
-                # st.image("file_name.png")
-                # st.graphviz_chart(gr)
-                # graph = pydotplus.graph_from_dot_data(dot_data)
-                # # st.write(graph.get_node_list()[2].get_attributes()['label'].split('<br/>'))
-                # for node in graph.get_node_list():
-                #     if node.get_attributes().get('label') is None:
-                #         continue
-                #     if 'samples = ' in node.get_attributes()['label']:
-                #         labels = node.get_attributes()['label'].split('<br/>')
-                #         for i, label in enumerate(labels):
-                #             if label.startswith('samples = '):
-                #                 labels[i] = 'samples = 0'
-                #         node.set('label', '<br/>'.join(labels))
-                #         node.set_fillcolor('white')
-                # st.image(graph.create_png())
             except:
                 st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
@@ -988,8 +954,6 @@ elif st.session_state.page == 1:
                         for num,column in enumerate(st.session_state.indep_vars):
                             number_input_value.append(st.number_input(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max()))
                             slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num], label_visibility='collapsed'))
-                        # for i in st.session_state.indep_vars:
-                        #     slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
                     with col2:
                         dd_arr = []
                         for i in range(len(dot_data)):
@@ -997,26 +961,13 @@ elif st.session_state.page == 1:
                                 dd_arr.append(dot_data[i+11:i+18])
                         for i in dd_arr:
                             dot_data = dot_data.replace(i,'white')
-                        # graph = pydotplus.graph_from_dot_data(dot_data)
-                        # for node in graph.get_node_list():
-                        #     if node.get_attributes().get('label') is None:
-                        #         continue
-                        #     if 'samples = ' in node.get_attributes()['label']:
-                        #         labels = node.get_attributes()['label'].split('<br/>')
-                        #         for i, label in enumerate(labels):
-                        #             if label.startswith('samples = '):
-                        #                 labels[i] = 'samples = 0'
-                        #         node.set('label', '<br/>'.join(labels))
-                        #         node.set_fillcolor('white')
                         cols = [i for i in range(len(slider_val))]
                         samples = pd.DataFrame(data=[slider_val], columns=cols)
-                        # st.write(dot_data)
                         decision_paths = model.estimators_[0].decision_path(samples).toarray()[0]
                         string1 = dot_data.splitlines()
                         str1 = []
                         str2 = []
                         for n,dec in enumerate(decision_paths):
-                            # st.write(dot_data.splitlines()[20])
                             if dec == 1 and n < 10:
                                 for i in range(len(string1)):
                                     if string1[i][:3] == f"{n} [":
@@ -1032,50 +983,8 @@ elif st.session_state.page == 1:
                         for i in range(len(str2)):
                             dot_data = dot_data.replace(str1[i],str2[i])
                         st.graphviz_chart(dot_data)
-                        # st.write(dot_data.splitlines())
-                        # st.write(decision_paths[14])
-                        # for decision_path in decision_paths:
-                        #     for n, node_value in enumerate(decision_path.toarray()[0]):
-                        #         if node_value == 0:
-                        #             continue
-                        #         node = graph.get_node(str(n))[0]            
-                        #         node.set_fillcolor('green')
-                        #         labels = node.get_attributes()['label'].split('<br/>')
-                        #         for i, label in enumerate(labels):
-                        #             if label.startswith('samples = '):
-                        #                 labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
-
-                        #         node.set('label', '<br/>'.join(labels))
-                        # st.image(graph.create_png())
-
                     pred = model.predict([slider_val])
-                    # num_steps = 100  
-                    # colors = []
-                    # pred_dict = {}
-                    # val = pred
-                    # min = float(st.session_state['filter_df'][st.session_state.dep_vars].min())
-                    # maxim = float(st.session_state['filter_df'][st.session_state.dep_vars].max())
-                    # steps = (min+maxim)/100
-                    # for i in range(num_steps):
-                    #     red = 255.0 if i < num_steps / 2 else 1.0 - (2.0 * (i - num_steps / 2) / num_steps)
-                    #     green = 1.0 - abs(i - num_steps / 2) / num_steps
-                    #     blue = 1.0 if i >= num_steps / 2 else 1.0 - (2.0 * (num_steps / 2 - i) / num_steps)
-                    #     colors.append((red, green, blue))
-                    # for i in range(num_steps):
-                    #     if min<=val and min+steps>=val:
-                    #         pred_dict[str(min)] = (0,0,0)
-                    #         pred_dict[str(min+steps)] = (0,0,0)
-                    #     else:
-                    #         pred_dict[str(min)] = colors[i]
-                    #     min+=steps
-                    # color_pal = pred_dict.values()
-                    # plt.figure(figsize=(10, 2))
-                    # plt.imshow([list(color_pal)], extent=[0, num_steps, 0, 1])
-                    # plt.axis('off')
                     with st.container(border=True):
-                        # st.write('Predicted Value')
-                        # st.pyplot(plt, use_container_width=True)
-                        # st.slider('', float(st.session_state['filter_df'][st.session_state.dep_vars].min()), float(st.session_state['filter_df'][st.session_state.dep_vars].max()), float(pred[0]), disabled=True)
                         st.info(f'Predicted value is {float(pred[0])}')
                 except AttributeError:
                     st.warning('Please select your Independent and Dependent variables')
