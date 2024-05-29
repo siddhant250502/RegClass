@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-# from imblearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline
 import statistics
 import datetime
 import graphviz
@@ -23,7 +23,7 @@ from streamlit_option_menu import option_menu
 import toml
 import math
 from streamlit_extras.stylable_container import stylable_container
-# from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import kaleido
@@ -267,7 +267,7 @@ def regre(df, indep_vars, dep_vars):
     df = data_cleaning(df)
     X = df[indep_vars]
     y = df[dep_vars[0]]
-    # oversample = SMOTE()
+    oversample = SMOTE()
     # undersample = 
 
     if len(y.unique()) >= 10:
@@ -311,7 +311,7 @@ def regre(df, indep_vars, dep_vars):
     else:
         rfc = RandomForestClassifier(max_depth = 5, max_leaf_nodes=12)
         # steps = [('over', oversample)]
-        #  = Pipeline(steps=steps)
+        # pipeline = Pipeline(steps=steps)
         # X_sm, y_sm = pipeline.fit_resample(X=X, y=y)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=21)
         
@@ -373,8 +373,8 @@ def plot_chart(y_test, y_pred):
     st.plotly_chart(fig, use_container_width=True)
 
 def oversampling(X_train, y_train):
-    # smt=SMOTE()
-    # X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
+    smt=SMOTE()
+    X_train_sm, Y_train_sm = smt.fit_resample(X_train, y_train)
     return X_train_sm, Y_train_sm
        
   
@@ -916,25 +916,39 @@ elif st.session_state.page == 1:
             
         with t3:
             # st.session_state['filter_df']
-            # try:
+            try:
                 model = st.session_state['model']
                 dot_data = export_graphviz(model.estimators_[0], out_file=None,
                                     feature_names=st.session_state['filter_df'].columns[:-1],
                                     class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
                                     filled=True, rounded=True,
                                     special_characters=True)
-                # dot_data
                 dd_arr = []
                 for i in range(len(dot_data)):
                     if dot_data[i:i+10] == 'fillcolor=':
                         dd_arr.append(dot_data[i+11:i+18])
                 for i in dd_arr:
                     dot_data = dot_data.replace(i,'white')
-                # dot_data
                 st.graphviz_chart(dot_data)
-                # gr = graphviz.Source(dot_data)
-                # st.write(gr.node)
-                # gr.format = "png"
+                # st.graphviz_chart(dot_data.splitlines())
+                # f=graphviz.Digraph(filename='output/filled_colorful_organogram.gv')
+                # names = ["A","B","C","D","E","F","G","H"]
+                # positions = ["CEO","Team A Lead","Team B Lead", "Staff A","Staff B", "Staff C", "Staff D", "Staff E"]
+                # colors = ["black", "skyblue", "mistyrose", "skyblue", "skyblue", "mistyrose", "mistyrose", "mistyrose"]
+                # for name, position, color in zip(names, positions, colors):
+                #     if name== "A":
+                #         f.node(name, position, color = color)
+                #     else:
+                #         f.node(name, position, style = "filled", color = color)
+                    
+                # #Specify edges
+                # f.edge("A","B"); f.edge("A","C")   #CEO to Team Leads
+                # f.edge("B","D"); f.edge("B","E")   #Team A relationship
+                # f.edge("C","F"); f.edge("C","G"); f.edge("C","H")   #Team B relationship
+                # st.graphviz_chart(f)
+                # for i in gr:
+                #     dot
+                # gr.format = "png"``
                 # st.image("file_name.png")
                 # st.graphviz_chart(gr)
                 # graph = pydotplus.graph_from_dot_data(dot_data)
@@ -950,8 +964,8 @@ elif st.session_state.page == 1:
                 #         node.set('label', '<br/>'.join(labels))
                 #         node.set_fillcolor('white')
                 # st.image(graph.create_png())
-            # except:
-            #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+            except:
+                st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
 
         with t4:
@@ -977,37 +991,62 @@ elif st.session_state.page == 1:
                         # for i in st.session_state.indep_vars:
                         #     slider_val.append(st.number_input(label = i, min_value = float(st.session_state['filter_df'][i].min()), max_value = float(st.session_state['filter_df'][i].max())))
                     with col2:
-                        graph = pydotplus.graph_from_dot_data(dot_data)
-                        for node in graph.get_node_list():
-                            if node.get_attributes().get('label') is None:
-                                continue
-                            if 'samples = ' in node.get_attributes()['label']:
-                                labels = node.get_attributes()['label'].split('<br/>')
-                                for i, label in enumerate(labels):
-                                    if label.startswith('samples = '):
-                                        labels[i] = 'samples = 0'
-                                node.set('label', '<br/>'.join(labels))
-                                node.set_fillcolor('white')
-
+                        dd_arr = []
+                        for i in range(len(dot_data)):
+                            if dot_data[i:i+10] == 'fillcolor=':
+                                dd_arr.append(dot_data[i+11:i+18])
+                        for i in dd_arr:
+                            dot_data = dot_data.replace(i,'white')
+                        # graph = pydotplus.graph_from_dot_data(dot_data)
+                        # for node in graph.get_node_list():
+                        #     if node.get_attributes().get('label') is None:
+                        #         continue
+                        #     if 'samples = ' in node.get_attributes()['label']:
+                        #         labels = node.get_attributes()['label'].split('<br/>')
+                        #         for i, label in enumerate(labels):
+                        #             if label.startswith('samples = '):
+                        #                 labels[i] = 'samples = 0'
+                        #         node.set('label', '<br/>'.join(labels))
+                        #         node.set_fillcolor('white')
                         cols = [i for i in range(len(slider_val))]
                         samples = pd.DataFrame(data=[slider_val], columns=cols)
-                        # st.write(samples)
-                        decision_paths = model.estimators_[0].decision_path(samples)
+                        # st.write(dot_data)
+                        decision_paths = model.estimators_[0].decision_path(samples).toarray()[0]
+                        string1 = dot_data.splitlines()
+                        str1 = []
+                        str2 = []
+                        for n,dec in enumerate(decision_paths):
+                            # st.write(dot_data.splitlines()[20])
+                            if dec == 1 and n < 10:
+                                for i in range(len(string1)):
+                                    if string1[i][:3] == f"{n} [":
+                                        str1.append(string1[i])
+                                        string1[i] = string1[i].replace('white', 'green')
+                                        str2.append(string1[i])
+                            elif dec == 1 and n >= 10:
+                                for i in range(len(string1)):
+                                    if string1[i][:4] == f"{n} [":
+                                        str1.append(string1[i])
+                                        string1[i] = string1[i].replace('white', 'green')
+                                        str2.append(string1[i])
+                        for i in range(len(str2)):
+                            dot_data = dot_data.replace(str1[i],str2[i])
+                        st.graphviz_chart(dot_data)
+                        # st.write(dot_data.splitlines())
+                        # st.write(decision_paths[14])
+                        # for decision_path in decision_paths:
+                        #     for n, node_value in enumerate(decision_path.toarray()[0]):
+                        #         if node_value == 0:
+                        #             continue
+                        #         node = graph.get_node(str(n))[0]            
+                        #         node.set_fillcolor('green')
+                        #         labels = node.get_attributes()['label'].split('<br/>')
+                        #         for i, label in enumerate(labels):
+                        #             if label.startswith('samples = '):
+                        #                 labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
 
-                        for decision_path in decision_paths:
-                            for n, node_value in enumerate(decision_path.toarray()[0]):
-                                if node_value == 0:
-                                    continue
-                                node = graph.get_node(str(n))[0]            
-                                node.set_fillcolor('green')
-                                labels = node.get_attributes()['label'].split('<br/>')
-                                for i, label in enumerate(labels):
-                                    if label.startswith('samples = '):
-                                        labels[i] = 'samples = {}'.format(int(label.split('=')[1]) + 1)
-
-                                node.set('label', '<br/>'.join(labels))
-                        graph.write_png('tree1.png')
-                        st.image('tree1.png')
+                        #         node.set('label', '<br/>'.join(labels))
+                        # st.image(graph.create_png())
 
                     pred = model.predict([slider_val])
                     # num_steps = 100  
