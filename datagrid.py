@@ -861,27 +861,27 @@ elif st.session_state.page == 1:
                     # st.dataframe(st.session_state['filter_df'], use_container_width=True)
                         
         with t2:
-            if st.session_state['filter_df'] is None :
-                if st.session_state['prev_tab']=='Data Header':
-                    if st.session_state['data_header_df'] is None:
-                        st.session_state['filter_df'] = df
-                    else:
-                        st.session_state['filter_df'] = st.session_state['data_header_df']
-                        
-                elif st.session_state['prev_tab'] == 'Data Statistics':
-                    if st.session_state['histogram_df'] is None:
-                        st.session_state['filter_df'] = st.session_state['data_header_df']
-                    else:
-                        st.session_state['filter_df'] = st.session_state['histogram_df']
-                        
-                elif st.session_state['prev_tab']=='Corelation Matrix':
-                    if st.session_state['corr_df'] is None:
-                        st.session_state['filter_df'] = st.session_state['histogram_df']
-                    else:
-                        st.session_state['filter_df'] = st.session_state['corr_df']
-                        
-                elif st.session_state['prev_tab']=='Plot':
-                        st.session_state['filter_df'] = st.session_state['corr_df']
+            
+            if st.session_state['prev_tab']=='Data Header':
+                if st.session_state['data_header_df'] is None:
+                    st.session_state['filter_df'] = df
+                else:
+                    st.session_state['filter_df'] = st.session_state['data_header_df']
+                    
+            elif st.session_state['prev_tab'] == 'Data Statistics':
+                if st.session_state['histogram_df'] is None:
+                    st.session_state['filter_df'] = st.session_state['data_header_df']
+                else:
+                    st.session_state['filter_df'] = st.session_state['histogram_df']
+                    
+            elif st.session_state['prev_tab']=='Corelation Matrix':
+                if st.session_state['corr_df'] is None:
+                    st.session_state['filter_df'] = st.session_state['histogram_df']
+                else:
+                    st.session_state['filter_df'] = st.session_state['corr_df']
+                    
+            elif st.session_state['prev_tab']=='Plot':
+                    st.session_state['filter_df'] = st.session_state['corr_df']
                     
             st.title('AI Model Analysis')
             col4, col5, c6  = st.columns([1,1,0.2])
