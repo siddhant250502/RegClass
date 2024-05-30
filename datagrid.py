@@ -961,13 +961,18 @@ elif st.session_state.page == 1:
                                 dd_arr.append(dot_data[i+11:i+18])
                         for i in dd_arr:
                             dot_data = dot_data.replace(i,'white')
-                        cols = [i for i in range(len(slider_val))]
-                        samples = pd.DataFrame(data=[slider_val], columns=cols)
+                        samples = pd.DataFrame(data=[slider_val], columns=st.session_state['filter_df'].columns[:-1])
                         decision_paths = model.estimators_[0].decision_path(samples).toarray()[0]
                         string1 = dot_data.splitlines()
                         str1 = []
                         str2 = []
+                        samples1 = pd.DataFrame(data=[st.session_state['checkpoint']], columns=st.session_state['filter_df'].columns[:-1])
+                        st.write('Point for Reference', samples1)
+                        decision_paths1 = model.estimators_[0].decision_path(samples1).toarray()[0]
+                        str3 = []
+                        str4 = []
                         for n,dec in enumerate(decision_paths):
+                        # st.write(dot_data.splitlines()[20])
                             if dec == 1 and n < 10:
                                 for i in range(len(string1)):
                                     if string1[i][:3] == f"{n} [":
@@ -980,9 +985,35 @@ elif st.session_state.page == 1:
                                         str1.append(string1[i])
                                         string1[i] = string1[i].replace('white', 'green')
                                         str2.append(string1[i])
-                        for i in range(len(str2)):
+                        for i in range(len(str1)):
                             dot_data = dot_data.replace(str1[i],str2[i])
+                        # dot_data
+    
+                        for n,dec in enumerate(decision_paths1):
+                            # st.write(dot_data.splitlines()[20])
+                            if dec == 1 and n < 10:
+                                for i in range(len(string1)):
+                                    if string1[i][:3] == f"{n} [":
+                                        str3.append(string1[i])
+                                        if 'white' in string1[i]:
+                                            string1[i] = string1[i].replace('white', 'red')
+                                        if 'green' in string1[i]:
+                                            string1[i] = string1[i].replace('green', 'red')
+                                        str4.append(string1[i])
+                            elif dec == 1 and n >= 10:
+                                for i in range(len(string1)):
+                                    if string1[i][:4] == f"{n} [":
+                                        str3.append(string1[i])
+                                        if 'white' in string1[i]:
+                                            string1[i] = string1[i].replace('white', 'red')
+                                        if 'green' in string1[i]:
+                                            string1[i] = string1[i].replace('green', 'red')
+                                        str4.append(string1[i])
+                        for i in range(len(str3)):
+                            dot_data = dot_data.replace(str3[i],str4[i])
+                        # dot_data
                         st.graphviz_chart(dot_data)
+
                     pred = model.predict([slider_val])
                     with st.container(border=True):
                         st.info(f'Predicted value is {float(pred[0])}')
