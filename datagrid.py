@@ -895,7 +895,7 @@ elif st.session_state.page == 1:
                 with col5.container(border=True):
                     dep_vars = st.multiselect('Dependent Variables', options=[x for x in st.session_state['filter_df'].columns.values[:-1] if x not in indep_vars], placeholder = "Choose an option", max_selections=1)
                 unique_vals = len(np.unique(st.session_state['filter_df'][dep_vars]))
-                if unique_vals<=7:  
+                if unique_vals<=10:  
                     with col4.container(border=True):
                         perf_reg = st.button('Classification')
                 else:
@@ -903,12 +903,13 @@ elif st.session_state.page == 1:
                         perf_reg = st.button('Regression')
                 st.session_state.indep_vars, st.session_state.dep_vars = indep_vars, dep_vars
                 if len(indep_vars)>=1 and len(dep_vars)>=1:
-                    data = st.session_state['filter_df'][indep_vars+dep_vars]
+                    st.session_state['filter_df']=st.session_state['filter_df'][st.session_state.indep_vars + st.session_state.dep_vars]
+                    # data = st.session_state['filter_df'][indep_vars+dep_vars]
 
                 if perf_reg:
-                    regre(data, indep_vars, dep_vars)
+                    regre(st.session_state['filter_df'], st.session_state.indep_vars, st.session_state.dep_vars)
                     st.session_state.reg = True
-                st.session_state['filter_df']=st.session_state['filter_df'][indep_vars+dep_vars]
+                
             except AttributeError:
                 pass
             except NameError:
