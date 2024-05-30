@@ -96,6 +96,9 @@ if "prev_tab" not in st.session_state:
 
 if "model" not in st.session_state:
     st.session_state['model'] = 0
+    
+if "checkpoint" not in st.session_state:
+    st.session_state['checkpoint'] = None
 
     
 def nextpage(): st.session_state.page += 1
