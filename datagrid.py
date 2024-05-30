@@ -275,7 +275,7 @@ def regre(df, indep_vars, dep_vars):
 
     if len(y.unique()) >= 10:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=21)
-        rfr = RandomForestRegressor()
+        rfr = RandomForestRegressor(max_depth = 5, max_leaf_nodes=12)
         try:
             rfr.fit(X_train, y_train)
         except ValueError as e:
