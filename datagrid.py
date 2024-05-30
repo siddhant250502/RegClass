@@ -957,6 +957,10 @@ elif st.session_state.page == 1:
                         for num,column in enumerate(st.session_state.indep_vars):
                             number_input_value.append(st.number_input(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max()))
                             slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num], label_visibility='collapsed'))
+                        if st.session_state['checkpoint'] is None:
+                            st.session_state['checkpoint'] = slider_val
+                        if st.button('Save Checkpoint'):
+                            st.session_state['checkpoint'] = slider_val
                     with col2:
                         dd_arr = []
                         for i in range(len(dot_data)):
