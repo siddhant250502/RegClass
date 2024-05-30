@@ -919,7 +919,7 @@ elif st.session_state.page == 1:
             
         with t3:
             # st.session_state['filter_df']
-            try:
+            # try:
                 model = st.session_state['model']
                 dot_data = export_graphviz(model.estimators_[0], out_file=None,
                                     feature_names=st.session_state['filter_df'].columns[:-1],
@@ -933,8 +933,8 @@ elif st.session_state.page == 1:
                 for i in dd_arr:
                     dot_data = dot_data.replace(i,'white')
                 st.graphviz_chart(dot_data)
-            except:
-                st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+            # except:
+            #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
 
 
         with t4:
