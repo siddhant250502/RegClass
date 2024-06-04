@@ -945,7 +945,10 @@ elif st.session_state.page == 1:
             if 'val' not in st.session_state:
                 st.session_state['val'] = [st.session_state['filter_df'][i].min() for i in st.session_state['filter_df'].columns[1:]]
             # if st.session_state.reg:
-            model = st.session_state['model']
+            try:
+                model = st.session_state['model']
+            except AttributeError:
+                pass
             # st.write(model)
             dot_data = export_graphviz(model.estimators_[0], out_file=None,
                                 feature_names=st.session_state['filter_df'].columns[:-1],
