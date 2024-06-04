@@ -943,94 +943,94 @@ elif st.session_state.page == 1:
             # st.write(data[st.session_state.dep_vars[0]].unique().to_array())
             if 'val' not in st.session_state:
                 st.session_state['val'] = [st.session_state['filter_df'][i].min() for i in st.session_state['filter_df'].columns[1:]]
-            if st.session_state.reg:
-                model = st.session_state['model']
-                dot_data = export_graphviz(model.estimators_[0], out_file=None,
-                                    feature_names=st.session_state['filter_df'].columns[:-1],
-                                    class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
-                                    filled=True, rounded=True,
-                                    special_characters=True)
-                # try:
-                col1, col2 = st.columns([1,7]) 
-                with col1:
-                    number_input_value = []
-                    slider_val = []
-                    for num,column in enumerate(st.session_state.indep_vars):
-                        number_input_value.append(st.number_input(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max()))
-                        slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num], label_visibility='collapsed'))
-                    if st.session_state['checkpoint'] is None:
-                        st.session_state['checkpoint'] = slider_val
-                    if st.button('Save Checkpoint'):
-                        st.session_state['checkpoint'] = slider_val
-                with col2:
-                    dd_arr = []
-                    for i in range(len(dot_data)):
-                        if dot_data[i:i+10] == 'fillcolor=':
-                            dd_arr.append(dot_data[i+11:i+18])
-                    for i in dd_arr:
-                        dot_data = dot_data.replace(i,'white')
-                    samples = pd.DataFrame(data=[slider_val], columns=st.session_state['filter_df'].columns[:-1])
-                    decision_paths = model.estimators_[0].decision_path(samples).toarray()[0]
-                    string1 = dot_data.splitlines()
-                    str1 = []
-                    str2 = []
-                    samples1 = pd.DataFrame(data=[st.session_state['checkpoint']], columns=st.session_state['filter_df'].columns[:-1])
-                    st.write('Point for Reference', samples1)
-                    decision_paths1 = model.estimators_[0].decision_path(samples1).toarray()[0]
-                    str3 = []
-                    str4 = []
-                    for n,dec in enumerate(decision_paths):
+            # if st.session_state.reg:
+            model = st.session_state['model']
+            dot_data = export_graphviz(model.estimators_[0], out_file=None,
+                                feature_names=st.session_state['filter_df'].columns[:-1],
+                                class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
+                                filled=True, rounded=True,
+                                special_characters=True)
+            # try:
+            col1, col2 = st.columns([1,7]) 
+            with col1:
+                number_input_value = []
+                slider_val = []
+                for num,column in enumerate(st.session_state.indep_vars):
+                    number_input_value.append(st.number_input(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max()))
+                    slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num], label_visibility='collapsed'))
+                if st.session_state['checkpoint'] is None:
+                    st.session_state['checkpoint'] = slider_val
+                if st.button('Save Checkpoint'):
+                    st.session_state['checkpoint'] = slider_val
+            with col2:
+                dd_arr = []
+                for i in range(len(dot_data)):
+                    if dot_data[i:i+10] == 'fillcolor=':
+                        dd_arr.append(dot_data[i+11:i+18])
+                for i in dd_arr:
+                    dot_data = dot_data.replace(i,'white')
+                samples = pd.DataFrame(data=[slider_val], columns=st.session_state['filter_df'].columns[:-1])
+                decision_paths = model.estimators_[0].decision_path(samples).toarray()[0]
+                string1 = dot_data.splitlines()
+                str1 = []
+                str2 = []
+                samples1 = pd.DataFrame(data=[st.session_state['checkpoint']], columns=st.session_state['filter_df'].columns[:-1])
+                st.write('Point for Reference', samples1)
+                decision_paths1 = model.estimators_[0].decision_path(samples1).toarray()[0]
+                str3 = []
+                str4 = []
+                for n,dec in enumerate(decision_paths):
+                # st.write(dot_data.splitlines()[20])
+                    if dec == 1 and n < 10:
+                        for i in range(len(string1)):
+                            if string1[i][:3] == f"{n} [":
+                                str1.append(string1[i])
+                                string1[i] = string1[i].replace('white', 'green')
+                                str2.append(string1[i])
+                    elif dec == 1 and n >= 10:
+                        for i in range(len(string1)):
+                            if string1[i][:4] == f"{n} [":
+                                str1.append(string1[i])
+                                string1[i] = string1[i].replace('white', 'green')
+                                str2.append(string1[i])
+                for i in range(len(str1)):
+                    dot_data = dot_data.replace(str1[i],str2[i])
+                # dot_data
+
+                for n,dec in enumerate(decision_paths1):
                     # st.write(dot_data.splitlines()[20])
-                        if dec == 1 and n < 10:
-                            for i in range(len(string1)):
-                                if string1[i][:3] == f"{n} [":
-                                    str1.append(string1[i])
-                                    string1[i] = string1[i].replace('white', 'green')
-                                    str2.append(string1[i])
-                        elif dec == 1 and n >= 10:
-                            for i in range(len(string1)):
-                                if string1[i][:4] == f"{n} [":
-                                    str1.append(string1[i])
-                                    string1[i] = string1[i].replace('white', 'green')
-                                    str2.append(string1[i])
-                    for i in range(len(str1)):
-                        dot_data = dot_data.replace(str1[i],str2[i])
-                    # dot_data
+                    if dec == 1 and n < 10:
+                        for i in range(len(string1)):
+                            if string1[i][:3] == f"{n} [":
+                                str3.append(string1[i])
+                                if 'white' in string1[i]:
+                                    string1[i] = string1[i].replace('white', 'red')
+                                if 'green' in string1[i]:
+                                    string1[i] = string1[i].replace('green', 'red')
+                                str4.append(string1[i])
+                    elif dec == 1 and n >= 10:
+                        for i in range(len(string1)):
+                            if string1[i][:4] == f"{n} [":
+                                str3.append(string1[i])
+                                if 'white' in string1[i]:
+                                    string1[i] = string1[i].replace('white', 'red')
+                                if 'green' in string1[i]:
+                                    string1[i] = string1[i].replace('green', 'red')
+                                str4.append(string1[i])
+                for i in range(len(str3)):
+                    dot_data = dot_data.replace(str3[i],str4[i])
+                # dot_data
+                st.graphviz_chart(dot_data)
 
-                    for n,dec in enumerate(decision_paths1):
-                        # st.write(dot_data.splitlines()[20])
-                        if dec == 1 and n < 10:
-                            for i in range(len(string1)):
-                                if string1[i][:3] == f"{n} [":
-                                    str3.append(string1[i])
-                                    if 'white' in string1[i]:
-                                        string1[i] = string1[i].replace('white', 'red')
-                                    if 'green' in string1[i]:
-                                        string1[i] = string1[i].replace('green', 'red')
-                                    str4.append(string1[i])
-                        elif dec == 1 and n >= 10:
-                            for i in range(len(string1)):
-                                if string1[i][:4] == f"{n} [":
-                                    str3.append(string1[i])
-                                    if 'white' in string1[i]:
-                                        string1[i] = string1[i].replace('white', 'red')
-                                    if 'green' in string1[i]:
-                                        string1[i] = string1[i].replace('green', 'red')
-                                    str4.append(string1[i])
-                    for i in range(len(str3)):
-                        dot_data = dot_data.replace(str3[i],str4[i])
-                    # dot_data
-                    st.graphviz_chart(dot_data)
-
-                pred = model.predict([slider_val])
-                with st.container(border=True):
-                    st.info(f'Predicted value is {float(pred[0])}')
-                # except AttributeError:
-                #     st.warning('Please select your Independent and Dependent variables')
-                # except KeyError as e:
-                #     st.error(e)
-                # except ValueError:
-                #     st.warning('Please select your Independent and Dependent variables')
-            else:
-                st.warning(f"Please run the AI model and the choose the predictor")
+            pred = model.predict([slider_val])
+            with st.container(border=True):
+                st.info(f'Predicted value is {float(pred[0])}')
+            # except AttributeError:
+            #     st.warning('Please select your Independent and Dependent variables')
+            # except KeyError as e:
+            #     st.error(e)
+            # except ValueError:
+            #     st.warning('Please select your Independent and Dependent variables')
+            # else:
+            #     st.warning(f"Please run the AI model and the choose the predictor")
             
