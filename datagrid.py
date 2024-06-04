@@ -921,13 +921,15 @@ elif st.session_state.page == 1:
                     pass
         with t3:
             # st.session_state['filter_df']
-            # try:
+            try:
                 model = st.session_state['model']
                 dot_data = export_graphviz(model.estimators_[0], out_file=None,
                                     feature_names=st.session_state['filter_df'].columns[:-1],
                                     class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
                                     filled=True, rounded=True,
                                     special_characters=True)
+            except:
+                pass
                 dd_arr = []
                 for i in range(len(dot_data)):
                     if dot_data[i:i+10] == 'fillcolor=':
