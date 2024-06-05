@@ -945,7 +945,7 @@ elif st.session_state.page == 1:
 
         with t4:
             if 'val' not in st.session_state:
-                st.session_state['val'] = [st.session_state['filter_df'][i].min() for i in st.session_state['filter_df'].columns[1:]]
+                st.session_state['val'] = [st.session_state['filter_df'][i].mean() for i in st.session_state['filter_df'].columns[1:]]
             # if st.session_state.reg:
             try:
                 model = st.session_state['model']
