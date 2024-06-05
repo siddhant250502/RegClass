@@ -937,9 +937,10 @@ elif st.session_state.page == 1:
                         dd_arr.append(dot_data[i+11:i+18])
                 for i in dd_arr:
                     dot_data = dot_data.replace(i,'white')
+                st.graphviz_chart(dot_data)
             except:
                 pass
-            st.graphviz_chart(dot_data)
+            
 
 
         with t4:
