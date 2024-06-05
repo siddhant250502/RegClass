@@ -1042,31 +1042,31 @@ elif st.session_state.page == 1:
                         dot_data = dot_data.replace(str3[i],str4[i])
                     st.graphviz_chart(dot_data)
                     for i in range(len(decision_paths)):
-                if decision_paths[len(decision_paths)-1-i]==1:
-                    last_node = len(decision_paths)-1-i
-                    break
-            for i in range(len(string1)):
-                    if last_node<10 and string1[i][:3] == f"{last_node} [":
-                        if st.session_state['model_type'] == 'regression':
-                            pred = string1[i].split('<br/>')[-1][:12]
-                        else:
-                            pred = string1[i].split('<br/>')[-1][:9]
-                    elif last_node>=10 and string1[i][:4] == f"{last_node} [":
-                        if st.session_state['model_type'] == 'regression':
-                            pred = string1[i].split('<br/>')[-1][:12]
-                        else:
-                            pred = string1[i].split('<br/>')[-1][:9]
-            with col1:
-                 with stylable_container(
-                        key='h3',
-                        css_styles="""
-                            h3 {
-                                font-size: 16px;
-                            }
-                        """
-                    ):
-                    st.subheader("Predictions")
-                    st.info(f'Predicted {pred}')
+                        if decision_paths[len(decision_paths)-1-i]==1:
+                            last_node = len(decision_paths)-1-i
+                            break
+                    for i in range(len(string1)):
+                            if last_node<10 and string1[i][:3] == f"{last_node} [":
+                                if st.session_state['model_type'] == 'regression':
+                                    pred = string1[i].split('<br/>')[-1][:12]
+                                else:
+                                    pred = string1[i].split('<br/>')[-1][:9]
+                            elif last_node>=10 and string1[i][:4] == f"{last_node} [":
+                                if st.session_state['model_type'] == 'regression':
+                                    pred = string1[i].split('<br/>')[-1][:12]
+                                else:
+                                    pred = string1[i].split('<br/>')[-1][:9]
+                    with col1:
+                         with stylable_container(
+                                key='h3',
+                                css_styles="""
+                                    h3 {
+                                        font-size: 16px;
+                                    }
+                                """
+                            ):
+                            st.subheader("Predictions")
+                            st.info(f'Predicted {pred}')
             except:
                 pass
             
