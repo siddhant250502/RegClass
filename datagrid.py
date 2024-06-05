@@ -99,6 +99,9 @@ if "model" not in st.session_state:
     
 if "checkpoint" not in st.session_state:
     st.session_state['checkpoint'] = None
+    
+if "model_type" not in st.session_state:
+    st.session_state['model_type'] = None
 
     
 def nextpage(): st.session_state.page += 1
@@ -107,7 +110,7 @@ def back():
     st.session_state.page -= 1 
     st.session_state.button_clicked = None
     st.session_state['col_name'] = set()
-    st.session_state['filter_df'] = st.session_state['data_header_df'] = st.session_state['histogram_df'] = st.session_state['corr_df'] = st.session_state['EXCLUDE_df'] = None
+    st.session_state['filter_df'] = st.session_state['data_header_df'] = st.session_state['histogram_df'] = st.session_state['corr_df'] = st.session_state['EXCLUDE_df'] = st.session_state['checkpoint'] = st.session_state['model_type'] = None
     st.session_state['prev_tab'] = "Data Header"
 placeholder = st.empty()
 
@@ -276,6 +279,7 @@ def regre(df, indep_vars, dep_vars):
     if len(y.unique()) >= 10:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=21)
         rfr = RandomForestRegressor(max_depth = 5, max_leaf_nodes=12)
+        st.session_state['model_type'] = 'regression'
         try:
             rfr.fit(X_train, y_train)
         except ValueError as e:
@@ -313,6 +317,7 @@ def regre(df, indep_vars, dep_vars):
             
     else:
         rfc = RandomForestClassifier(max_depth = 5, max_leaf_nodes=12)
+        st.session_state['model_type'] = 'classification'
         # steps = [('over', oversample)]
         # pipeline = Pipeline(steps=steps)
         # X_sm, y_sm = pipeline.fit_resample(X=X, y=y)
@@ -864,61 +869,60 @@ elif st.session_state.page == 1:
                     # st.dataframe(st.session_state['filter_df'], use_container_width=True)
                         
         with t2:
-            try:
-                if st.session_state['prev_tab']=='Data Header':
-                    if st.session_state['data_header_df'] is None:
-                        st.session_state['filter_df'] = df
-                    else:
-                        st.session_state['filter_df'] = st.session_state['data_header_df']
-                        
-                elif st.session_state['prev_tab'] == 'Data Statistics':
-                    if st.session_state['histogram_df'] is None:
-                        st.session_state['filter_df'] = st.session_state['data_header_df']
-                    else:
-                        st.session_state['filter_df'] = st.session_state['histogram_df']
-                        
-                elif st.session_state['prev_tab']=='Corelation Matrix':
-                    if st.session_state['corr_df'] is None:
-                        st.session_state['filter_df'] = st.session_state['histogram_df']
-                    else:
-                        st.session_state['filter_df'] = st.session_state['corr_df']
-                        
-                elif st.session_state['prev_tab']=='Plot':
-                        st.session_state['filter_df'] = st.session_state['corr_df']
-                        
-                st.title('AI Model Analysis')
-                col4, col5, c6  = st.columns([1,1,0.2])
-                col9, col10, col11, col12 = st.columns([0.4, 0.4, 0.3, 0.7])
-                try:
-                    with col4.container(border=True):
-                        indep_vars = st.multiselect('Independent Variables', st.session_state['filter_df'].columns.values[:-1], placeholder = "Choose an option")
-                    with col5.container(border=True):
-                        dep_vars = st.multiselect('Dependent Variables', options=[x for x in st.session_state['filter_df'].columns.values[:-1] if x not in indep_vars], placeholder = "Choose an option", max_selections=1)
-                    unique_vals = len(np.unique(st.session_state['filter_df'][dep_vars]))
-                    if unique_vals<=10:  
-                        with col4.container(border=True):
-                            perf_reg = st.button('Classification')
-                    else:
-                        with col4.container(border=True):
-                            perf_reg = st.button('Regression')
-                    st.session_state.indep_vars, st.session_state.dep_vars = indep_vars, dep_vars
-                    if len(indep_vars)>=1 and len(dep_vars)>=1:
-                        st.session_state['filter_df']=st.session_state['filter_df'][st.session_state.indep_vars + st.session_state.dep_vars]
-                        # data = st.session_state['filter_df'][indep_vars+dep_vars]
-    
-                    if perf_reg:
-                        regre(st.session_state['filter_df'], st.session_state.indep_vars, st.session_state.dep_vars)
-                        st.session_state.reg = True
+            
+            if st.session_state['prev_tab']=='Data Header':
+                if st.session_state['data_header_df'] is None:
+                    st.session_state['filter_df'] = df
+                else:
+                    st.session_state['filter_df'] = st.session_state['data_header_df']
                     
-                except AttributeError:
-                    pass
-                except NameError:
-                    if len(indep_vars) == 0:
-                        st.warning('Choose Independent variable')
-                    if len(dep_vars) == 0:
-                        st.warning('Choose Dependent variable')
+            elif st.session_state['prev_tab'] == 'Data Statistics':
+                if st.session_state['histogram_df'] is None:
+                    st.session_state['filter_df'] = st.session_state['data_header_df']
+                else:
+                    st.session_state['filter_df'] = st.session_state['histogram_df']
+                    
+            elif st.session_state['prev_tab']=='Corelation Matrix':
+                if st.session_state['corr_df'] is None:
+                    st.session_state['filter_df'] = st.session_state['histogram_df']
+                else:
+                    st.session_state['filter_df'] = st.session_state['corr_df']
+                    
+            elif st.session_state['prev_tab']=='Plot':
+                    st.session_state['filter_df'] = st.session_state['corr_df']
+                    
+            st.title('AI Model Analysis')
+            col4, col5, c6  = st.columns([1,1,0.2])
+            col9, col10, col11, col12 = st.columns([0.4, 0.4, 0.3, 0.7])
+            try:
+                with col4.container(border=True):
+                    indep_vars = st.multiselect('Independent Variables', st.session_state['filter_df'].columns.values[:-1], placeholder = "Choose an option")
+                with col5.container(border=True):
+                    dep_vars = st.multiselect('Dependent Variables', options=[x for x in st.session_state['filter_df'].columns.values[:-1] if x not in indep_vars], placeholder = "Choose an option", max_selections=1)
+                unique_vals = len(np.unique(st.session_state['filter_df'][dep_vars]))
+                if unique_vals<=10:  
+                    with col4.container(border=True):
+                        perf_reg = st.button('Classification')
+                else:
+                    with col4.container(border=True):
+                        perf_reg = st.button('Regression')
+                st.session_state.indep_vars, st.session_state.dep_vars = indep_vars, dep_vars
+                if len(indep_vars)>=1 and len(dep_vars)>=1:
+                    st.session_state['filter_df']=st.session_state['filter_df'][st.session_state.indep_vars + st.session_state.dep_vars]
+                    # data = st.session_state['filter_df'][indep_vars+dep_vars]
+
+                if perf_reg:
+                    regre(st.session_state['filter_df'], st.session_state.indep_vars, st.session_state.dep_vars)
+                    st.session_state.reg = True
+                
             except AttributeError:
-                    pass
+                pass
+            except NameError:
+                if len(indep_vars) == 0:
+                    st.warning('Choose Independent variable')
+                if len(dep_vars) == 0:
+                    st.warning('Choose Dependent variable')
+            
         with t3:
             # st.session_state['filter_df']
             try:
@@ -928,8 +932,6 @@ elif st.session_state.page == 1:
                                     class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
                                     filled=True, rounded=True,
                                     special_characters=True)
-            except:
-                pass
                 dd_arr = []
                 for i in range(len(dot_data)):
                     if dot_data[i:i+10] == 'fillcolor=':
@@ -937,8 +939,8 @@ elif st.session_state.page == 1:
                 for i in dd_arr:
                     dot_data = dot_data.replace(i,'white')
                 st.graphviz_chart(dot_data)
-            # except:
-            #     st.warning(f"Please run the AI model and the choose the Decision Tree Analysis")
+            except AttributeError:
+                pass
 
 
         with t4:
@@ -947,17 +949,12 @@ elif st.session_state.page == 1:
             if 'val' not in st.session_state:
                 st.session_state['val'] = [st.session_state['filter_df'][i].min() for i in st.session_state['filter_df'].columns[1:]]
             # if st.session_state.reg:
-            try:
-                model = st.session_state['model']
-            
-            # st.write(model)
-                dot_data = export_graphviz(model.estimators_[0], out_file=None,
-                                    feature_names=st.session_state['filter_df'].columns[:-1],
-                                    class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
-                                    filled=True, rounded=True,
-                                    special_characters=True)
-            except AttributeError:
-                pass
+            model = st.session_state['model']
+            dot_data = export_graphviz(model.estimators_[0], out_file=None,
+                                feature_names=st.session_state['filter_df'].columns[:-1],
+                                class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
+                                filled=True, rounded=True,
+                                special_characters=True)
             # try:
             col1, col2 = st.columns([1,7]) 
             with col1:
@@ -968,8 +965,8 @@ elif st.session_state.page == 1:
                     slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num], label_visibility='collapsed'))
                 if st.session_state['checkpoint'] is None:
                     st.session_state['checkpoint'] = slider_val
-                if st.button('Save Checkpoint'):
-                    st.session_state['checkpoint'] = slider_val
+                # if st.button('Save Checkpoint'):
+                # st.session_state['checkpoint'] = slider_val
             with col2:
                 dd_arr = []
                 for i in range(len(dot_data)):
@@ -983,7 +980,9 @@ elif st.session_state.page == 1:
                 str1 = []
                 str2 = []
                 samples1 = pd.DataFrame(data=[st.session_state['checkpoint']], columns=st.session_state['filter_df'].columns[:-1])
-                st.write('Point for Reference', samples1)
+                st.info('Initial Point')
+                st.dataframe(samples1, hide_index=True)
+                st.info("Tree")
                 decision_paths1 = model.estimators_[0].decision_path(samples1).toarray()[0]
                 str3 = []
                 str4 = []
@@ -993,13 +992,13 @@ elif st.session_state.page == 1:
                         for i in range(len(string1)):
                             if string1[i][:3] == f"{n} [":
                                 str1.append(string1[i])
-                                string1[i] = string1[i].replace('white', 'green')
+                                string1[i] = string1[i].replace('white', '#90EE90')
                                 str2.append(string1[i])
                     elif dec == 1 and n >= 10:
                         for i in range(len(string1)):
                             if string1[i][:4] == f"{n} [":
                                 str1.append(string1[i])
-                                string1[i] = string1[i].replace('white', 'green')
+                                string1[i] = string1[i].replace('white', '#90EE90')
                                 str2.append(string1[i])
                 for i in range(len(str1)):
                     dot_data = dot_data.replace(str1[i],str2[i])
@@ -1012,33 +1011,51 @@ elif st.session_state.page == 1:
                             if string1[i][:3] == f"{n} [":
                                 str3.append(string1[i])
                                 if 'white' in string1[i]:
-                                    string1[i] = string1[i].replace('white', 'red')
-                                if 'green' in string1[i]:
-                                    string1[i] = string1[i].replace('green', 'red')
+                                    string1[i] = string1[i].replace('white', '#FF7F7F')
+                                if '#90EE90' in string1[i]:
+                                    string1[i] = string1[i].replace('#90EE90', '#FF7F7F')
                                 str4.append(string1[i])
                     elif dec == 1 and n >= 10:
                         for i in range(len(string1)):
                             if string1[i][:4] == f"{n} [":
                                 str3.append(string1[i])
                                 if 'white' in string1[i]:
-                                    string1[i] = string1[i].replace('white', 'red')
-                                if 'green' in string1[i]:
-                                    string1[i] = string1[i].replace('green', 'red')
+                                    string1[i] = string1[i].replace('white', '#FF7F7F')
+                                if '#90EE90' in string1[i]:
+                                    string1[i] = string1[i].replace('#90EE90', '#FF7F7F')
                                 str4.append(string1[i])
                 for i in range(len(str3)):
                     dot_data = dot_data.replace(str3[i],str4[i])
-                # dot_data
                 st.graphviz_chart(dot_data)
 
-            pred = model.predict([slider_val])
-            with st.container(border=True):
-                st.info(f'Predicted value is {float(pred[0])}')
-            # except AttributeError:
-            #     st.warning('Please select your Independent and Dependent variables')
-            # except KeyError as e:
-            #     st.error(e)
-            # except ValueError:
-            #     st.warning('Please select your Independent and Dependent variables')
+            # st.write(dot_data.splitlines())
+            # st.write(model.estimators_[0].decision_path(samples).toarray())
+            for i in range(len(decision_paths)):
+                if decision_paths[len(decision_paths)-1-i]==1:
+                    last_node = len(decision_paths)-1-i
+                    break
+            for i in range(len(string1)):
+                    if last_node<10 and string1[i][:3] == f"{last_node} [":
+                        if st.session_state['model_type'] == 'regression':
+                            pred = string1[i].split('<br/>')[-1][:12]
+                        else:
+                            pred = string1[i].split('<br/>')[-1][:9]
+                    elif last_node>=10 and string1[i][:4] == f"{last_node} [":
+                        if st.session_state['model_type'] == 'regression':
+                            pred = string1[i].split('<br/>')[-1][:12]
+                        else:
+                            pred = string1[i].split('<br/>')[-1][:9]
+            with col1:
+                st.subheader("Predictions")
+                st.info(f'Predicted {pred}')
+                
+                        
+            #     except AttributeError:
+            #         st.warning('Please select your Independent and Dependent variables')
+            #     except KeyError as e:
+            #         st.error(e)
+            #     except ValueError:
+            #         st.warning('Please select your Independent and Dependent variables')
             # else:
             #     st.warning(f"Please run the AI model and the choose the predictor")
             
