@@ -1048,12 +1048,12 @@ elif st.session_state.page == 1:
                     for i in range(len(string1)):
                             if last_node<10 and string1[i][:3] == f"{last_node} [":
                                 if st.session_state['model_type'] == 'regression':
-                                    pred = string1[i].split('<br/>')[-1][:12]
+                                    pred = string1[i].split('<br/>')[-1][:11]
                                 else:
                                     pred = string1[i].split('<br/>')[-1][:9]
                             elif last_node>=10 and string1[i][:4] == f"{last_node} [":
                                 if st.session_state['model_type'] == 'regression':
-                                    pred = string1[i].split('<br/>')[-1][:12]
+                                    pred = string1[i].split('<br/>')[-1][:11]
                                 else:
                                     pred = string1[i].split('<br/>')[-1][:9]
                     with col1:
