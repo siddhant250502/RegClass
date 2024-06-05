@@ -937,7 +937,6 @@ elif st.session_state.page == 1:
             for i in dd_arr:
                 dot_data = dot_data.replace(i,'white')
             st.graphviz_chart(dot_data)
-        
 
 
         with t4:
@@ -977,9 +976,25 @@ elif st.session_state.page == 1:
                 str1 = []
                 str2 = []
                 samples1 = pd.DataFrame(data=[st.session_state['checkpoint']], columns=st.session_state['filter_df'].columns[:-1])
-                st.info('Initial Point')
+                with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                    st.subheader('Initial Point')
                 st.dataframe(samples1, hide_index=True)
-                st.info("Tree")
+                with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                    st.subheader("Tree")
                 decision_paths1 = model.estimators_[0].decision_path(samples1).toarray()[0]
                 str3 = []
                 str4 = []
@@ -1043,8 +1058,16 @@ elif st.session_state.page == 1:
                         else:
                             pred = string1[i].split('<br/>')[-1][:9]
             with col1:
-                st.subheader("Predictions")
-                st.info(f'Predicted {pred}')
+                 with stylable_container(
+                        key='h3',
+                        css_styles="""
+                            h3 {
+                                font-size: 16px;
+                            }
+                        """
+                    ):
+                    st.subheader("Predictions")
+                    st.info(f'Predicted {pred}')
                 
                         
             #     except AttributeError:
