@@ -1041,13 +1041,7 @@ elif st.session_state.page == 1:
                     for i in range(len(str3)):
                         dot_data = dot_data.replace(str3[i],str4[i])
                     st.graphviz_chart(dot_data)
-            except:
-                pass
-            
-
-            # st.write(dot_data.splitlines())
-            # st.write(model.estimators_[0].decision_path(samples).toarray())
-            for i in range(len(decision_paths)):
+                    for i in range(len(decision_paths)):
                 if decision_paths[len(decision_paths)-1-i]==1:
                     last_node = len(decision_paths)-1-i
                     break
@@ -1073,6 +1067,10 @@ elif st.session_state.page == 1:
                     ):
                     st.subheader("Predictions")
                     st.info(f'Predicted {pred}')
+            except:
+                pass
+            
+            
                 
                         
             #     except AttributeError:
