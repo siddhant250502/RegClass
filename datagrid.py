@@ -945,7 +945,7 @@ elif st.session_state.page == 1:
 
         with t4:
             if 'val' not in st.session_state:
-                st.session_state['val'] = [st.session_state['filter_df'][i].mean() for i in st.session_state['filter_df'].columns[1:]]
+                st.session_state['val'] = [st.session_state['filter_df'][i].min() for i in st.session_state['filter_df'].columns[1:]]
             # if st.session_state.reg:
             try:
                 model = st.session_state['model']
@@ -961,7 +961,7 @@ elif st.session_state.page == 1:
                     slider_val = []
                     for num,column in enumerate(st.session_state.indep_vars):
                         number_input_value.append(st.number_input(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max()))
-                        slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num], label_visibility='collapsed'))
+                        slider_val.append(st.slider(column, st.session_state['filter_df'][column].min(), st.session_state['filter_df'][column].max(), value=number_input_value[num].mean(), label_visibility='collapsed'))
                     if st.session_state['checkpoint'] is None:
                         st.session_state['checkpoint'] = slider_val
                     # if st.button('Save Checkpoint'):
