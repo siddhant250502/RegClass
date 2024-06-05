@@ -1040,9 +1040,10 @@ elif st.session_state.page == 1:
                                     str4.append(string1[i])
                     for i in range(len(str3)):
                         dot_data = dot_data.replace(str3[i],str4[i])
+                    st.graphviz_chart(dot_data)
             except:
                 pass
-            st.graphviz_chart(dot_data)
+            
 
             # st.write(dot_data.splitlines())
             # st.write(model.estimators_[0].decision_path(samples).toarray())
