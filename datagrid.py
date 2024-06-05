@@ -997,7 +997,7 @@ elif st.session_state.page == 1:
                                 }
                             """
                         ):
-                        st.subheader("Tree for {st.session_state.dep_vars}")
+                        st.subheader(f"Tree for {st.session_state.dep_vars[0]}")
                     decision_paths1 = model.estimators_[0].decision_path(samples1).toarray()[0]
                     str3 = []
                     str4 = []
@@ -1066,7 +1066,7 @@ elif st.session_state.page == 1:
                                 """
                             ):
                             st.subheader("Predictions")
-                            st.info(f'Predicted {st.session_state.dep_vars} {pred}')
+                            st.info(f'Predicted {st.session_state.dep_vars[0]} {pred}')
             except:
                 pass
             
