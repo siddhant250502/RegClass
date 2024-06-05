@@ -931,14 +931,14 @@ elif st.session_state.page == 1:
                                 class_names=[str(i) for i in st.session_state['filter_df'][st.session_state['filter_df'].columns[-1]].unique()],
                                 filled=True, rounded=True,
                                 special_characters=True)
-            except AttributeError:
+                dd_arr = []
+                for i in range(len(dot_data)):
+                    if dot_data[i:i+10] == 'fillcolor=':
+                        dd_arr.append(dot_data[i+11:i+18])
+                for i in dd_arr:
+                    dot_data = dot_data.replace(i,'white')
+            except:
                 pass
-            dd_arr = []
-            for i in range(len(dot_data)):
-                if dot_data[i:i+10] == 'fillcolor=':
-                    dd_arr.append(dot_data[i+11:i+18])
-            for i in dd_arr:
-                dot_data = dot_data.replace(i,'white')
             st.graphviz_chart(dot_data)
 
 
