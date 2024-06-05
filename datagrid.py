@@ -1056,7 +1056,7 @@ elif st.session_state.page == 1:
                                     pred = string1[i].split('<br/>')[-1][:11]
                                 else:
                                     pred = string1[i].split('<br/>')[-1][:9]
-                    with col1:
+                    with col2:
                          with stylable_container(
                                 key='h3',
                                 css_styles="""
